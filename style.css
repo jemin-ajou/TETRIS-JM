@@ -805,11 +805,12 @@ body.skin-light .toggle-btn.active, body.skin-light .bgm-toggle-btn.active, body
     .stat-box label { font-size: 0.4rem; }
     .stat-box span { font-size: 0.7rem; }
 
-    /* Board sizing: Ultra Maximized */
+    /* Board sizing: Exact Mockup Ratio */
     #p1-board, #p2-board {
-        height: 70vh; /* Increased from 65vh */
+        height: 68vh; 
         width: auto;
         max-width: 100%;
+        margin-top: 5px;
     }
 
     .board-wrap.next-piece {
@@ -832,69 +833,65 @@ body.skin-light .toggle-btn.active, body.skin-light .bgm-toggle-btn.active, body
         height: 140px !important;
     }
 
-    /* Virtual Controller: Tight 3-Cluster Layout */
+    /* Virtual Controller: 5-Circle Mockup Layout */
     #virtual-controller {
         display: flex !important;
         flex-direction: row;
         align-items: center;
-        justify-content: space-between;
+        justify-content: center;
+        gap: 25px; /* Gap between clusters */
         width: 100%;
-        margin-top: 2px;
-        padding: 2px 5px 5px 5px;
+        margin-top: 0;
+        padding: 10px 0 20px 0;
         position: fixed;
         bottom: 0;
         left: 0;
-        background: rgba(0,0,0,0.8);
-        backdrop-filter: blur(5px);
-        height: 70px; /* Fixed height for controller */
+        background: rgba(0,0,0,0.9);
         z-index: 200;
     }
 
     .control-group {
         display: flex;
-        gap: 3px;
+        gap: 12px;
         align-items: center;
         justify-content: center;
-        flex: 1;
     }
 
     .ctrl-btn {
-        width: 40px;
-        height: 40px;
-        font-size: 0.9rem;
-        border-radius: 6px;
+        width: 55px;
+        height: 55px;
+        font-size: 1.2rem;
+        border-radius: 50%;
         background: rgba(255, 255, 255, 0.05);
-        border: 1px solid var(--primary);
+        border: 2px solid var(--primary);
         color: var(--primary);
         display: flex;
         align-items: center;
         justify-content: center;
         padding: 0;
-        transition: transform 0.1s;
+        transition: all 0.1s;
+        box-shadow: 0 0 15px rgba(0, 242, 255, 0.1);
     }
 
     .ctrl-btn:active {
         transform: scale(0.9);
         background: var(--primary);
         color: #000;
+        box-shadow: 0 0 30px var(--primary);
     }
 
     .ctrl-btn.rotate {
-        width: 65px;
-        height: 40px;
         border-color: var(--secondary);
         color: var(--secondary);
-        font-weight: 700;
-        font-size: 0.75rem;
+        font-size: 0.8rem;
+        font-weight: bold;
     }
 
     .ctrl-btn.drop {
-        width: 75px;
-        height: 40px;
         border-color: var(--accent);
         color: var(--accent);
-        font-weight: 700;
-        font-size: 0.75rem;
+        font-size: 0.8rem;
+        font-weight: bold;
     }
 }
 
