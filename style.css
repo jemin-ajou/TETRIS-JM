@@ -778,10 +778,10 @@ body.skin-light .toggle-btn.active, body.skin-light .bgm-toggle-btn.active, body
     }
 
     .game-layout {
-        flex-direction: row !important; /* Back to horizontal but tight */
-        justify-content: center;
+        flex-direction: row !important;
+        justify-content: flex-start; /* Push everything to left to allow NEXT on edge */
         align-items: flex-start;
-        gap: 8px !important;
+        gap: 0 !important; /* Remove gap, use margins for NEXT */
         width: 100%;
         margin-top: 5px;
     }
@@ -805,22 +805,24 @@ body.skin-light .toggle-btn.active, body.skin-light .bgm-toggle-btn.active, body
     .stat-box label { font-size: 0.4rem; }
     .stat-box span { font-size: 0.7rem; }
 
-    /* Board sizing: Exact Mockup Ratio */
+    /* Board sizing: Maximized */
     #p1-board, #p2-board {
-        height: 55vh; /* Reduced from 68vh to prevent overlap with buttons */
+        height: 62vh; /* Balanced enlargement */
         width: auto;
-        max-width: 100%;
+        max-width: 80vw; /* Allow it to be wider */
         margin-top: 5px;
+        flex: 1;
     }
 
     .board-wrap.next-piece {
         flex-direction: column;
-        width: 40px;
+        width: 45px;
         padding: 0;
-        gap: 5px;
-        order: -1; /* Place on the left */
+        gap: 2px;
+        order: -1; 
         background: transparent;
         border: none;
+        margin-left: 5px; /* Push near the edge */
     }
 
     .board-wrap.next-piece label {
