@@ -807,7 +807,7 @@ body.skin-light .toggle-btn.active, body.skin-light .bgm-toggle-btn.active, body
 
     /* Board sizing: Exact Mockup Ratio */
     #p1-board, #p2-board {
-        height: 68vh; 
+        height: 55vh; /* Reduced from 68vh to prevent overlap with buttons */
         width: auto;
         max-width: 100%;
         margin-top: 5px;
@@ -833,21 +833,26 @@ body.skin-light .toggle-btn.active, body.skin-light .bgm-toggle-btn.active, body
         height: 140px !important;
     }
 
+    .game-controls {
+        display: none !important; /* Hide settings in-game on mobile */
+    }
+
     /* Virtual Controller: 5-Circle Mockup Layout */
     #virtual-controller {
         display: flex !important;
         flex-direction: row;
         align-items: center;
         justify-content: center;
-        gap: 25px; /* Gap between clusters */
+        gap: 15px; /* Reduced gap to fit all screens */
         width: 100%;
         margin-top: 0;
-        padding: 10px 0 20px 0;
+        padding: 10px 5px 20px 5px;
         position: fixed;
         bottom: 0;
         left: 0;
         background: rgba(0,0,0,0.9);
         z-index: 200;
+        flex-wrap: nowrap; /* Prevent buttons from going to next line */
     }
 
     .control-group {
@@ -858,9 +863,9 @@ body.skin-light .toggle-btn.active, body.skin-light .bgm-toggle-btn.active, body
     }
 
     .ctrl-btn {
-        width: 55px;
-        height: 55px;
-        font-size: 1.2rem;
+        width: 48px; /* Reduced size to ensure 5 fit in a row */
+        height: 48px;
+        font-size: 1.1rem;
         border-radius: 50%;
         background: rgba(255, 255, 255, 0.05);
         border: 2px solid var(--primary);
@@ -870,7 +875,8 @@ body.skin-light .toggle-btn.active, body.skin-light .bgm-toggle-btn.active, body
         justify-content: center;
         padding: 0;
         transition: all 0.1s;
-        box-shadow: 0 0 15px rgba(0, 242, 255, 0.1);
+        box-shadow: 0 0 10px rgba(0, 242, 255, 0.1);
+        flex-shrink: 0; /* Don't shrink buttons below this size */
     }
 
     .ctrl-btn:active {
@@ -883,14 +889,14 @@ body.skin-light .toggle-btn.active, body.skin-light .bgm-toggle-btn.active, body
     .ctrl-btn.rotate {
         border-color: var(--secondary);
         color: var(--secondary);
-        font-size: 0.8rem;
+        font-size: 0.75rem;
         font-weight: bold;
     }
 
     .ctrl-btn.drop {
         border-color: var(--accent);
         color: var(--accent);
-        font-size: 0.8rem;
+        font-size: 0.75rem;
         font-weight: bold;
     }
 }

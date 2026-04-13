@@ -531,7 +531,7 @@ class Tetris {
         this.nextCtx.fillStyle = '#000';
         this.nextCtx.fillRect(0, 0, this.nextCanvas.width, this.nextCanvas.height);
 
-        const isHorizontal = this.nextCanvas.clientWidth > this.nextCanvas.clientHeight;
+        const isHorizontal = this.nextCanvas.width > this.nextCanvas.height;
         const previewBlockSize = isHorizontal ? 12 : (this.nextCanvas.width * 0.3); 
         const spacing = isHorizontal ? 40 : (previewBlockSize * 2.8);
         
