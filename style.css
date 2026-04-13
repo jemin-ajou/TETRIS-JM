@@ -805,9 +805,9 @@ body.skin-light .toggle-btn.active, body.skin-light .bgm-toggle-btn.active, body
     .stat-box label { font-size: 0.4rem; }
     .stat-box span { font-size: 0.7rem; }
 
-    /* Board sizing: Even larger */
+    /* Board sizing: Maximized */
     #p1-board, #p2-board {
-        height: 58vh; /* Increased from 52vh */
+        height: 65vh; /* Increased from 58vh */
         width: auto;
         max-width: 100%;
     }
