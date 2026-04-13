@@ -832,66 +832,60 @@ body.skin-light .toggle-btn.active, body.skin-light .bgm-toggle-btn.active, body
         height: 140px !important;
     }
 
-    /* Virtual Controller: Refined Positioning */
+    /* Virtual Controller: 3-Cluster Layout */
     #virtual-controller {
         display: flex !important;
         flex-direction: row;
-        align-items: flex-end; /* Align to bottom */
-        justify-content: center;
-        gap: 25px;
-        width: 100%;
-        margin-top: 2px;
-        padding-bottom: 5px;
-    }
-
-    .d-pad-area {
-        display: flex;
-        flex-direction: column;
         align-items: center;
-        gap: 2px;
+        justify-content: space-around;
+        width: 100%;
+        margin-top: 5px;
+        padding: 5px 10px 10px 10px;
+        gap: 5px;
     }
 
-    .d-pad-row {
+    .control-group {
         display: flex;
-        gap: 4px;
-        justify-content: center;
+        gap: 5px;
+        align-items: center;
+    }
+
+    .control-group.directions {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 5px;
+        border-radius: 12px;
     }
 
     .ctrl-btn {
-        width: 44px;
-        height: 44px;
-        font-size: 1.1rem;
-        border-radius: 50%;
+        width: 42px;
+        height: 42px;
+        font-size: 1rem;
+        border-radius: 8px;
         background: rgba(0, 242, 255, 0.05);
-        border: 2px solid var(--primary);
+        border: 1px solid var(--primary);
         color: var(--primary);
         display: flex;
         align-items: center;
         justify-content: center;
         padding: 0;
-        box-shadow: 0 0 8px rgba(0, 242, 255, 0.2);
     }
 
     .ctrl-btn.rotate {
-        border-color: var(--primary);
-        color: var(--primary);
-    }
-
-    .drop-area {
-        display: flex;
-        align-items: flex-end;
-        padding-bottom: 2px;
+        width: 70px;
+        font-size: 0.75rem;
+        font-weight: bold;
+        border-color: var(--secondary);
+        color: var(--secondary);
+        background: rgba(112, 0, 255, 0.1);
     }
 
     .ctrl-btn.drop {
         width: 80px;
-        height: 44px;
-        border-radius: 8px;
-        background: rgba(255, 0, 200, 0.1);
-        border: 2px solid var(--accent);
-        color: var(--accent);
+        font-size: 0.8rem;
         font-weight: bold;
-        font-size: 0.85rem;
+        border-color: var(--accent);
+        color: var(--accent);
+        background: rgba(255, 0, 200, 0.1);
     }
 }
 
