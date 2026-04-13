@@ -545,7 +545,7 @@ class Tetris {
             
             let startX, startY;
             if (isHorizontal) {
-                startX = index * spacing + 5;
+                startX = index * (this.nextCanvas.width / 4) + 10;
                 startY = 10;
             } else {
                 startX = (this.nextCanvas.width - pieceWidth) / 2;

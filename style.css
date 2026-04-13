@@ -714,126 +714,132 @@ body.skin-light .toggle-btn.active, body.skin-light .bgm-toggle-btn.active, body
 
 @media (max-width: 600px) {
     h1 {
-        font-size: 2.5rem;
-        margin-bottom: 1rem;
-        letter-spacing: 5px;
+        font-size: 2.22rem;
+        margin-bottom: 0.8rem;
+        letter-spacing: 4px;
     }
 
     #main-menu {
-        padding: 1.5rem;
+        padding: 1rem;
         min-height: auto;
-        gap: 20px;
+        gap: 15px;
+        justify-content: center;
     }
 
     .glow-btn.x-large {
-        padding: 15px 20px;
-        font-size: 1.1rem;
+        padding: 12px 15px;
+        font-size: 1rem;
         min-width: 100%;
     }
 
     .settings-row-final {
         flex-direction: column;
-        gap: 15px;
-        margin-top: 10px;
-        width: 100%;
+        gap: 10px;
+        margin-top: 5px;
     }
 
     .neon-select {
         width: 100% !important;
-        min-width: 100% !important;
-        padding: 10px 15px;
+        min-width: 0 !important;
+        padding: 8px 12px;
+        font-size: 0.8rem;
     }
 
     .premium-card-grid {
         grid-template-columns: 1fr;
-        gap: 10px;
-        padding: 10px;
+        gap: 8px;
+        padding: 5px;
     }
 
     .premium-neon-card {
-        padding: 15px;
-        min-width: 0;
-    }
-
-    .premium-neon-card h3 {
-        font-size: 1.2rem;
+        padding: 12px;
     }
 
     #game-container {
-        flex-direction: column;
-        align-items: center;
-        gap: 10px;
-        padding: 10px 5px;
-        width: 100%;
+        flex-direction: row; /* Allow side-by-side in AI mode if very small */
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: flex-start;
+        gap: 5px;
+        padding: 5px;
         height: 100vh;
         overflow: hidden;
+    }
+
+    /* AI Battle on Mobile: Side by Side */
+    #game-container:not(.single-active) .player-area {
+        width: 48%;
+        gap: 5px;
+    }
+
+    #game-container.single-active .player-area {
+        width: 100%;
+        gap: 8px;
     }
 
     .game-layout {
         flex-direction: column !important;
         align-items: center;
-        gap: 5px !important;
-        width: 100%;
+        gap: 2px !important;
     }
 
-    .player-area {
-        width: 100%;
-        justify-content: flex-start;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .board-wrapper {
-        width: 100%;
-        display: flex;
-        justify-content: center;
-    }
-
-    #p1-board, #p2-board {
-        width: 70vw;
-        max-width: 250px;
-        height: auto;
-    }
-
-    .board-wrap.next-piece {
-        flex-direction: row;
-        width: auto;
-        padding: 5px 15px;
-        gap: 20px;
-    }
-
-    .next-preview {
-        width: 100px !important;
-        height: 40px !important;
-    }
-
+    /* Stats on top for space saving */
     .stats {
-        margin-top: 0;
-        gap: 5px;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        gap: 2px;
     }
 
     .stat-box {
-        padding: 3px 5px;
+        padding: 2px;
         min-width: 0;
+        flex: 1;
+        border-left-width: 2px;
     }
 
-    .stat-box label { font-size: 0.5rem; }
-    .stat-box span { font-size: 0.8rem; }
+    .stat-box label { font-size: 0.45rem; }
+    .stat-box span { font-size: 0.75rem; }
+
+    /* Board sizing: Height is the constraint */
+    #p1-board, #p2-board {
+        height: 48vh; /* Limit to half screen height */
+        width: auto;
+        max-width: 100%;
+    }
+
+    .board-wrap.next-piece {
+        padding: 2px 8px;
+        gap: 10px;
+        min-width: 0;
+        border: none;
+        background: transparent;
+    }
+
+    .next-preview {
+        width: 80px !important;
+        height: 35px !important;
+    }
+
+    .game-controls {
+        display: none !important; /* Hide settings in-game on mobile */
+    }
 
     #virtual-controller {
         display: flex;
-        margin-top: 5px;
-        gap: 8px;
+        margin-top: 0;
+        gap: 5px;
+        padding-bottom: 5px;
     }
 
     .ctrl-btn {
-        width: 50px;
-        height: 50px;
-        font-size: 1.2rem;
+        width: 45px;
+        height: 45px;
+        font-size: 1.1rem;
     }
 
     .ctrl-btn.highlight {
-        width: 70px;
+        width: 60px;
     }
 }
 

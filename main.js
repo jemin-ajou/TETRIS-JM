@@ -288,6 +288,7 @@ function startMode(mode) {
         p2Area.classList.remove('hidden');
         p1ModeInfoBox.classList.add('hidden');
         p1ExtraInfoBox.classList.add('hidden');
+        gameContainer.classList.remove('single-active');
         initAiMode();
     } else {
         p2Area.classList.add('hidden');
@@ -311,8 +312,23 @@ function startMode(mode) {
         }
         
         initSingleMode(mode);
+        gameContainer.classList.add('single-active');
     }
     
+    // Fix next canvas resolution for mobile
+    const isMobile = window.innerWidth < 600;
+    const nextCanvases = [document.getElementById('p1-next'), document.getElementById('p2-next')];
+    nextCanvases.forEach(canvas => {
+        if (!canvas) return;
+        if (isMobile) {
+            canvas.width = 160;
+            canvas.height = 70;
+        } else {
+            canvas.width = 80;
+            canvas.height = 320;
+        }
+    });
+
     handleResize();
 }
 
