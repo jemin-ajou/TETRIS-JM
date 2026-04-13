@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TETRIS JM - Single & Multi Modes</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+</head>
+<body class="skin-neon">
+    <div id="app">
+        <div id="main-menu" class="overlay active">
+            <!-- Row 1: Title -->
+            <h1 class="glitch" data-text="TETRIS JM">TETRIS JM</h1>
+
+            <!-- Tier 1: Selection Screens -->
+            <div id="menu-main-tier" class="menu-tier">
+                <!-- Row 2: Core Actions (Core Trio) -->
+                <div class="menu-row core-trio">
+                    <button id="btn-nav-single" class="glow-btn x-large">SINGLE MODE</button>
+                    <button id="btn-nav-ai" class="glow-btn x-large">AI BATTLE</button>
+                    <button id="btn-nav-rank" class="glow-btn x-large">RANKING</button>
+                </div>
+
+                <!-- Row 3: Final Settings (Two Select Boxes) -->
+                <div class="menu-row settings-row-final">
+                    <div class="setting-item-box">
+                        <label>INPUT SPEED</label>
+                        <select class="neon-select input-speed-select">
+                            <option value="high">HIGH (상)</option>
+                            <option value="medium" selected>MEDIUM (중)</option>
+                            <option value="low">LOW (하)</option>
+                        </select>
+                    </div>
+                    <div class="setting-item-box">
+                        <label>SKIN THEME</label>
+                        <select id="skin-select" class="neon-select">
+                            <option value="neon">NEON (기본)</option>
+                            <option value="classic">CLASSIC (클래식)</option>
+                            <option value="dark">DARK (다크)</option>
+                            <option value="light">LIGHT (라이트)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tier 2: Single Mode Selection -->
+            <div id="menu-single-tier" class="menu-tier hidden">
+                <div class="tier-header">
+                    <h2>SELECT MODE</h2>
+                </div>
+                <div class="premium-card-grid">
+                    <div class="premium-neon-card mode-card" data-mode="standard">
+                        <div class="card-content">
+                            <h3>STANDARD</h3>
+                            <p>Classic endless score attack.</p>
+                        </div>
+                    </div>
+                    <div class="premium-neon-card mode-card" data-mode="sprint">
+                        <div class="card-content">
+                            <h3>SPRINT</h3>
+                            <p>Clear 40 lines as fast as possible!</p>
+                        </div>
+                    </div>
+                    <div class="premium-neon-card mode-card" data-mode="random">
+                        <div class="card-content">
+                            <h3>RANDOM</h3>
+                            <p>Board shifts every 5,000 points!</p>
+                        </div>
+                    </div>
+                    <div class="premium-neon-card mode-card" data-mode="rising">
+                        <div class="card-content">
+                            <h3>RISING</h3>
+                            <p>Garbage rises from the bottom!</p>
+                        </div>
+                    </div>
+                </div>
+                <button class="glow-btn back-btn" id="btn-back-single">← BACK TO MAIN</button>
+            </div>
+
+            <!-- Tier 3: AI Difficulty Selection -->
+            <div id="menu-ai-tier" class="menu-tier hidden">
+                <div class="tier-header">
+                    <h2>SELECT DIFFICULTY</h2>
+                </div>
+                <div class="premium-card-grid">
+                    <div class="premium-neon-card diff-card" data-level="easy">
+                        <div class="card-content">
+                            <h3>EASY</h3>
+                            <p>Relaxed pace for beginners.</p>
+                        </div>
+                    </div>
+                    <div class="premium-neon-card diff-card" data-level="medium">
+                        <div class="card-content">
+                            <h3>MEDIUM</h3>
+                            <p>Standard balanced challenge.</p>
+                        </div>
+                    </div>
+                    <div class="premium-neon-card diff-card" data-level="hard">
+                        <div class="card-content">
+                            <h3>HARD</h3>
+                            <p>High speed and precision.</p>
+                        </div>
+                    </div>
+                    <div class="premium-neon-card diff-card" data-level="boss">
+                        <div class="card-content">
+                            <h3>BOSS</h3>
+                            <p>Ultimate AI confrontation.</p>
+                        </div>
+                    </div>
+                </div>
+                <button class="glow-btn back-btn" id="btn-back-ai">← BACK TO MAIN</button>
+            </div>
+        </div>
+
+        <!-- 게임 화면 -->
+        <div id="game-container" class="hidden">
+            <div id="player1-area" class="player-area">
+                <div class="stats">
+                    <div class="stat-box">
+                        <label>SCORE</label>
+                        <span id="p1-score">000000</span>
+                    </div>
+                    <div class="stat-box">
+                        <label>LEVEL</label>
+                        <span id="p1-level">1</span>
+                    </div>
+                    <div id="p1-combo-box" class="stat-box combo-box">
+                        <label>COMBO</label>
+                        <span id="p1-combo">0</span>
+                    </div>
+                    <div id="p1-mode-info-box" class="stat-box hidden">
+                        <label id="p1-mode-info-label">LINES</label>
+                        <span id="p1-mode-info-value">0</span>
+                    </div>
+                    <div id="p1-extra-info-box" class="stat-box hidden">
+                        <label id="p1-extra-info-label">EXTRA</label>
+                        <span id="p1-extra-info-value">0</span>
+                    </div>
+                    <div id="p1-timer-box" class="stat-box hidden">
+                        <label>TIME</label>
+                        <span id="p1-timer-value">00.00</span>
+                    </div>
+                </div>
+                <!-- 조작부: 스킨 선택 및 고스트 토글 -->
+                <div class="game-controls">
+                    <button class="pause-toggle-btn" title="Pause/Resume">⏸️</button>
+                    <button class="sfx-toggle-btn" title="Toggle SFX">🔊</button>
+                    <select class="input-speed-select mini-select" title="In-game Sensitivity">
+                        <option value="high">SPEED: HIGH</option>
+                        <option value="medium">SPEED: MED</option>
+                        <option value="low">SPEED: LOW</option>
+                    </select>
+                    <button id="p1-ghost-toggle" class="toggle-btn active" title="Toggle Ghost Piece">👻</button>
+                    <select class="in-game-skin-select">
+                        <option value="neon">NEON SKIN</option>
+                        <option value="classic">CLASSIC SKIN</option>
+                        <option value="dark">DARK SKIN</option>
+                        <option value="light">LIGHT SKIN</option>
+                    </select>
+                </div>
+                <div class="game-layout">
+                    <div class="board-wrap next-piece">
+                        <label>NEXT</label>
+                        <canvas id="p1-next" class="next-preview" width="80" height="320"></canvas>
+                    </div>
+                    <div class="board-wrapper">
+                        <canvas id="p1-board" width="350" height="700"></canvas>
+                    </div>
+                </div>
+                <!-- 모바일용 가상 컨트롤러 -->
+                <div id="virtual-controller" class="mobile-only">
+                    <div class="control-row top">
+                        <button id="touch-rotate" class="ctrl-btn">↻</button>
+                    </div>
+                    <div class="control-row middle">
+                        <button id="touch-left" class="ctrl-btn">←</button>
+                        <button id="touch-hard-drop" class="ctrl-btn highlight">DROP</button>
+                        <button id="touch-right" class="ctrl-btn">→</button>
+                    </div>
+                    <div class="control-row bottom">
+                        <button id="touch-down" class="ctrl-btn">↓</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="player2-area" class="player-area hidden">
+                <div class="stats">
+                    <div class="stat-box">
+                        <label>SCORE</label>
+                        <span id="p2-score">000000</span>
+                    </div>
+                    <div class="stat-box">
+                        <label>LEVEL</label>
+                        <span id="p2-level">1</span>
+                    </div>
+                    <div class="stat-box combo-box">
+                        <label>COMBO</label>
+                        <span id="p2-combo">0</span>
+                    </div>
+                </div>
+                <!-- 조작부: 스킨 선택 및 고스트 토글 -->
+                <div class="game-controls">
+                    <select class="neo-select in-game-skin-select">
+                        <option value="neon">NEON SKIN</option>
+                        <option value="classic">CLASSIC SKIN</option>
+                        <option value="dark">DARK SKIN</option>
+                        <option value="light">LIGHT SKIN</option>
+                    </select>
+                    <select class="input-speed-select" title="Input Sensitivity">
+                        <option value="high">SPEED: HIGH (상)</option>
+                        <option value="medium" selected>SPEED: MED (중)</option>
+                        <option value="low">SPEED: LOW (하)</option>
+                    </select>
+                    <button class="bgm-toggle-btn" title="BGM On/Off">🎵</button>
+                    <button class="sfx-toggle-btn" title="SFX On/Off">🔊</button>
+                    <button class="pause-toggle-btn" title="Pause/Resume">⏸️</button>
+                    <button id="p2-ghost-toggle" class="toggle-btn active">GHOST: ON</button>
+                </div>
+                <div class="game-layout">
+                    <div class="board-wrap next-piece">
+                        <label>NEXT</label>
+                        <canvas id="p2-next" class="next-preview" width="80" height="320"></canvas>
+                    </div>
+                    <div class="board-wrapper">
+                        <canvas id="p2-board" width="350" height="700"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 게임 오버 오버레이 -->
+        <div id="game-over" class="overlay hidden">
+            <h2 id="winner-text">GAME OVER</h2>
+            <div class="final-score">
+                <p id="final-msg">Your Score: <span id="final-val">0</span></p>
+            </div>
+            <button id="btn-restart" class="neo-btn">RESTART</button>
+            <button id="btn-home" class="neo-btn secondary">HOME</button>
+        </div>
+
+        <!-- 랭킹 오버레이 -->
+        <div id="ranking-overlay" class="overlay hidden">
+            <h2 class="glitch" data-text="HALL OF FAME">HALL OF FAME</h2>
+            <div class="ranking-mode-selector">
+                <button class="rank-tab active" data-mode="standard">STANDARD</button>
+                <button class="rank-tab" data-mode="sprint">SPRINT</button>
+                <button class="rank-tab" data-mode="random">RANDOM</button>
+                <button class="rank-tab" data-mode="rising">RISING</button>
+            </div>
+            <div class="ranking-list" id="rank-list-content">
+                <!-- 랭킹 데이터가 동적으로 삽입됨 -->
+            </div>
+            <button id="btn-rank-close" class="neo-btn">BACK</button>
+        </div>
+
+        <!-- 이름 입력 오버레이 (새 기록 달성 시) -->
+        <div id="name-input-overlay" class="overlay hidden">
+            <h2 class="neon-text">NEW RECORD!</h2>
+            <p>Enter your name for the leaderboard:</p>
+            <input type="text" id="player-name-input" maxlength="10" placeholder="CYBER_PUNK">
+            <button id="btn-save-score" class="neo-btn">SAVE RECORD</button>
+        </div>
+    </div>
+
+    <script src="audio.js"></script>
+    <script src="constants.js"></script>
+    <script src="tetris.js"></script>
+    <script src="ai.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>
