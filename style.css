@@ -713,62 +713,127 @@ body.skin-light .toggle-btn.active, body.skin-light .bgm-toggle-btn.active, body
 }
 
 @media (max-width: 600px) {
-    .menu-buttons {
-        flex-direction: column;
-        width: 100%;
-        max-width: 300px;
+    h1 {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        letter-spacing: 5px;
     }
 
-    .neo-btn {
-        width: 100%;
+    #main-menu {
+        padding: 1.5rem;
+        min-height: auto;
+        gap: 20px;
     }
 
-    .difficulty-buttons {
-        flex-direction: column;
-        align-items: stretch;
-        width: 100%;
-    }
-
-    .diff-btn {
+    .glow-btn.x-large {
+        padding: 15px 20px;
+        font-size: 1.1rem;
         min-width: 100%;
     }
 
-    .stats {
-        flex-wrap: nowrap;
-        justify-content: space-between;
-        gap: 5px;
+    .settings-row-final {
+        flex-direction: column;
+        gap: 15px;
+        margin-top: 10px;
         width: 100%;
     }
 
-    .stat-box {
-        min-width: 0;
-        flex: 1;
-        padding: 5px;
-    }
-    
-    .stat-box label {
-        font-size: 0.6rem;
-    }
-    
-    .stat-box .value, .stat-box span {
-        font-size: 0.8rem;
+    .neon-select {
+        width: 100% !important;
+        min-width: 100% !important;
+        padding: 10px 15px;
     }
 
-    .instructions {
-        display: none; /* Hide keyboard controls on small mobile */
+    .premium-card-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        padding: 10px;
+    }
+
+    .premium-neon-card {
+        padding: 15px;
+        min-width: 0;
+    }
+
+    .premium-neon-card h3 {
+        font-size: 1.2rem;
+    }
+
+    #game-container {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 5px;
+        width: 100%;
+        height: 100vh;
+        overflow: hidden;
+    }
+
+    .game-layout {
+        flex-direction: column !important;
+        align-items: center;
+        gap: 5px !important;
+        width: 100%;
+    }
+
+    .player-area {
+        width: 100%;
+        justify-content: flex-start;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .board-wrapper {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+
+    #p1-board, #p2-board {
+        width: 70vw;
+        max-width: 250px;
+        height: auto;
     }
 
     .board-wrap.next-piece {
         flex-direction: row;
-        width: 100%;
-        justify-content: center;
-        gap: 10px;
-        padding: 5px;
+        width: auto;
+        padding: 5px 15px;
+        gap: 20px;
     }
 
     .next-preview {
-        width: 120px !important;
-        height: 60px !important;
+        width: 100px !important;
+        height: 40px !important;
+    }
+
+    .stats {
+        margin-top: 0;
+        gap: 5px;
+    }
+
+    .stat-box {
+        padding: 3px 5px;
+        min-width: 0;
+    }
+
+    .stat-box label { font-size: 0.5rem; }
+    .stat-box span { font-size: 0.8rem; }
+
+    #virtual-controller {
+        display: flex;
+        margin-top: 5px;
+        gap: 8px;
+    }
+
+    .ctrl-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 1.2rem;
+    }
+
+    .ctrl-btn.highlight {
+        width: 70px;
     }
 }
 
