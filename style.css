@@ -805,9 +805,9 @@ body.skin-light .toggle-btn.active, body.skin-light .bgm-toggle-btn.active, body
     .stat-box label { font-size: 0.4rem; }
     .stat-box span { font-size: 0.7rem; }
 
-    /* Board sizing: Move it up and make it reasonably large */
+    /* Board sizing: Even larger */
     #p1-board, #p2-board {
-        height: 52vh;
+        height: 58vh; /* Increased from 52vh */
         width: auto;
         max-width: 100%;
     }
@@ -828,39 +828,39 @@ body.skin-light .toggle-btn.active, body.skin-light .bgm-toggle-btn.active, body
     }
 
     .next-preview {
-        width: 40px !important;
-        height: 160px !important;
+        width: 35px !important;
+        height: 140px !important;
     }
 
-    /* Virtual Controller: Mockup Layout */
+    /* Virtual Controller: Refined Positioning */
     #virtual-controller {
         display: flex !important;
         flex-direction: row;
-        align-items: center;
+        align-items: flex-end; /* Align to bottom */
         justify-content: center;
-        gap: 20px;
+        gap: 25px;
         width: 100%;
-        margin-top: 5px;
-        padding-bottom: 10px;
+        margin-top: 2px;
+        padding-bottom: 5px;
     }
 
     .d-pad-area {
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 5px;
+        gap: 2px;
     }
 
     .d-pad-row {
         display: flex;
-        gap: 5px;
+        gap: 4px;
         justify-content: center;
     }
 
     .ctrl-btn {
-        width: 48px;
-        height: 48px;
-        font-size: 1.2rem;
+        width: 44px;
+        height: 44px;
+        font-size: 1.1rem;
         border-radius: 50%;
         background: rgba(0, 242, 255, 0.05);
         border: 2px solid var(--primary);
@@ -869,7 +869,7 @@ body.skin-light .toggle-btn.active, body.skin-light .bgm-toggle-btn.active, body
         align-items: center;
         justify-content: center;
         padding: 0;
-        box-shadow: 0 0 10px rgba(0, 242, 255, 0.2);
+        box-shadow: 0 0 8px rgba(0, 242, 255, 0.2);
     }
 
     .ctrl-btn.rotate {
@@ -879,18 +879,19 @@ body.skin-light .toggle-btn.active, body.skin-light .bgm-toggle-btn.active, body
 
     .drop-area {
         display: flex;
-        align-items: center;
+        align-items: flex-end;
+        padding-bottom: 2px;
     }
 
     .ctrl-btn.drop {
-        width: 75px;
-        height: 50px;
-        border-radius: 12px;
+        width: 80px;
+        height: 44px;
+        border-radius: 8px;
         background: rgba(255, 0, 200, 0.1);
         border: 2px solid var(--accent);
         color: var(--accent);
         font-weight: bold;
-        font-size: 0.9rem;
+        font-size: 0.85rem;
     }
 }
 
