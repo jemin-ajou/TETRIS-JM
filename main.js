@@ -321,8 +321,8 @@ function startMode(mode) {
     nextCanvases.forEach(canvas => {
         if (!canvas) return;
         if (isMobile) {
-            canvas.width = 160;
-            canvas.height = 70;
+            canvas.width = 40;
+            canvas.height = 160;
         } else {
             canvas.width = 80;
             canvas.height = 320;

@@ -170,16 +170,18 @@
                 </div>
                 <!-- 모바일용 가상 컨트롤러 -->
                 <div id="virtual-controller" class="mobile-only">
-                    <div class="control-row top">
-                        <button id="touch-rotate" class="ctrl-btn">↻</button>
+                    <div class="d-pad-area">
+                        <div class="d-pad-row">
+                            <button id="touch-rotate" class="ctrl-btn rotate">↻</button>
+                        </div>
+                        <div class="d-pad-row">
+                            <button id="touch-left" class="ctrl-btn">←</button>
+                            <button id="touch-down" class="ctrl-btn">↓</button>
+                            <button id="touch-right" class="ctrl-btn">→</button>
+                        </div>
                     </div>
-                    <div class="control-row middle">
-                        <button id="touch-left" class="ctrl-btn">←</button>
-                        <button id="touch-hard-drop" class="ctrl-btn highlight">DROP</button>
-                        <button id="touch-right" class="ctrl-btn">→</button>
-                    </div>
-                    <div class="control-row bottom">
-                        <button id="touch-down" class="ctrl-btn">↓</button>
+                    <div class="drop-area">
+                        <button id="touch-hard-drop" class="ctrl-btn drop">DROP</button>
                     </div>
                 </div>
             </div>

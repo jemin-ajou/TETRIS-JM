@@ -756,7 +756,7 @@ body.skin-light .toggle-btn.active, body.skin-light .bgm-toggle-btn.active, body
     }
 
     #game-container {
-        flex-direction: row; /* Allow side-by-side in AI mode if very small */
+        flex-direction: row;
         flex-wrap: wrap;
         justify-content: center;
         align-items: flex-start;
@@ -768,27 +768,31 @@ body.skin-light .toggle-btn.active, body.skin-light .bgm-toggle-btn.active, body
 
     /* AI Battle on Mobile: Side by Side */
     #game-container:not(.single-active) .player-area {
-        width: 48%;
-        gap: 5px;
+        width: 49%;
+        gap: 2px;
     }
 
     #game-container.single-active .player-area {
         width: 100%;
-        gap: 8px;
+        gap: 5px;
     }
 
     .game-layout {
-        flex-direction: column !important;
-        align-items: center;
-        gap: 2px !important;
+        flex-direction: row !important; /* Back to horizontal but tight */
+        justify-content: center;
+        align-items: flex-start;
+        gap: 8px !important;
+        width: 100%;
+        margin-top: 5px;
     }
 
-    /* Stats on top for space saving */
+    /* Stats on top */
     .stats {
         width: 100%;
         display: flex;
         justify-content: space-between;
         gap: 2px;
+        order: -1;
     }
 
     .stat-box {
@@ -798,48 +802,95 @@ body.skin-light .toggle-btn.active, body.skin-light .bgm-toggle-btn.active, body
         border-left-width: 2px;
     }
 
-    .stat-box label { font-size: 0.45rem; }
-    .stat-box span { font-size: 0.75rem; }
+    .stat-box label { font-size: 0.4rem; }
+    .stat-box span { font-size: 0.7rem; }
 
-    /* Board sizing: Height is the constraint */
+    /* Board sizing: Move it up and make it reasonably large */
     #p1-board, #p2-board {
-        height: 48vh; /* Limit to half screen height */
+        height: 52vh;
         width: auto;
         max-width: 100%;
     }
 
     .board-wrap.next-piece {
-        padding: 2px 8px;
-        gap: 10px;
-        min-width: 0;
-        border: none;
+        flex-direction: column;
+        width: 40px;
+        padding: 0;
+        gap: 5px;
+        order: -1; /* Place on the left */
         background: transparent;
+        border: none;
+    }
+
+    .board-wrap.next-piece label {
+        font-size: 0.6rem;
+        color: #888;
     }
 
     .next-preview {
-        width: 80px !important;
-        height: 35px !important;
+        width: 40px !important;
+        height: 160px !important;
     }
 
-    .game-controls {
-        display: none !important; /* Hide settings in-game on mobile */
-    }
-
+    /* Virtual Controller: Mockup Layout */
     #virtual-controller {
+        display: flex !important;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        width: 100%;
+        margin-top: 5px;
+        padding-bottom: 10px;
+    }
+
+    .d-pad-area {
         display: flex;
-        margin-top: 0;
+        flex-direction: column;
+        align-items: center;
         gap: 5px;
-        padding-bottom: 5px;
+    }
+
+    .d-pad-row {
+        display: flex;
+        gap: 5px;
+        justify-content: center;
     }
 
     .ctrl-btn {
-        width: 45px;
-        height: 45px;
-        font-size: 1.1rem;
+        width: 48px;
+        height: 48px;
+        font-size: 1.2rem;
+        border-radius: 50%;
+        background: rgba(0, 242, 255, 0.05);
+        border: 2px solid var(--primary);
+        color: var(--primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        box-shadow: 0 0 10px rgba(0, 242, 255, 0.2);
     }
 
-    .ctrl-btn.highlight {
-        width: 60px;
+    .ctrl-btn.rotate {
+        border-color: var(--primary);
+        color: var(--primary);
+    }
+
+    .drop-area {
+        display: flex;
+        align-items: center;
+    }
+
+    .ctrl-btn.drop {
+        width: 75px;
+        height: 50px;
+        border-radius: 12px;
+        background: rgba(255, 0, 200, 0.1);
+        border: 2px solid var(--accent);
+        color: var(--accent);
+        font-weight: bold;
+        font-size: 0.9rem;
     }
 }
 
