@@ -805,9 +805,9 @@ body.skin-light .toggle-btn.active, body.skin-light .bgm-toggle-btn.active, body
     .stat-box label { font-size: 0.4rem; }
     .stat-box span { font-size: 0.7rem; }
 
-    /* Board sizing: Maximized */
+    /* Board sizing: Ultra Maximized */
     #p1-board, #p2-board {
-        height: 65vh; /* Increased from 58vh */
+        height: 70vh; /* Increased from 65vh */
         width: auto;
         max-width: 100%;
     }
@@ -832,60 +832,69 @@ body.skin-light .toggle-btn.active, body.skin-light .bgm-toggle-btn.active, body
         height: 140px !important;
     }
 
-    /* Virtual Controller: 3-Cluster Layout */
+    /* Virtual Controller: Tight 3-Cluster Layout */
     #virtual-controller {
         display: flex !important;
         flex-direction: row;
         align-items: center;
-        justify-content: space-around;
+        justify-content: space-between;
         width: 100%;
-        margin-top: 5px;
-        padding: 5px 10px 10px 10px;
-        gap: 5px;
+        margin-top: 2px;
+        padding: 2px 5px 5px 5px;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        background: rgba(0,0,0,0.8);
+        backdrop-filter: blur(5px);
+        height: 70px; /* Fixed height for controller */
+        z-index: 200;
     }
 
     .control-group {
         display: flex;
-        gap: 5px;
+        gap: 3px;
         align-items: center;
-    }
-
-    .control-group.directions {
-        background: rgba(255, 255, 255, 0.05);
-        padding: 5px;
-        border-radius: 12px;
+        justify-content: center;
+        flex: 1;
     }
 
     .ctrl-btn {
-        width: 42px;
-        height: 42px;
-        font-size: 1rem;
-        border-radius: 8px;
-        background: rgba(0, 242, 255, 0.05);
+        width: 40px;
+        height: 40px;
+        font-size: 0.9rem;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.05);
         border: 1px solid var(--primary);
         color: var(--primary);
         display: flex;
         align-items: center;
         justify-content: center;
         padding: 0;
+        transition: transform 0.1s;
+    }
+
+    .ctrl-btn:active {
+        transform: scale(0.9);
+        background: var(--primary);
+        color: #000;
     }
 
     .ctrl-btn.rotate {
-        width: 70px;
-        font-size: 0.75rem;
-        font-weight: bold;
+        width: 65px;
+        height: 40px;
         border-color: var(--secondary);
         color: var(--secondary);
-        background: rgba(112, 0, 255, 0.1);
+        font-weight: 700;
+        font-size: 0.75rem;
     }
 
     .ctrl-btn.drop {
-        width: 80px;
-        font-size: 0.8rem;
-        font-weight: bold;
+        width: 75px;
+        height: 40px;
         border-color: var(--accent);
         color: var(--accent);
-        background: rgba(255, 0, 200, 0.1);
+        font-weight: 700;
+        font-size: 0.75rem;
     }
 }
 
