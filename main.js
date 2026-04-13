@@ -41,14 +41,16 @@ const keyTimers = {};
 const keyRepeatIntervals = {};
 
 // Dynamic Scaling Logic
+// Dynamic Scaling Logic
 function handleResize() {
-    const baseWidth = isAiMode ? 1400 : 800;
-    const baseHeight = 1000;
-    const padding = 40;
+    const isMobile = window.innerWidth < 600;
+    const baseWidth = isAiMode ? 1400 : (isMobile ? 450 : 850);
+    const baseHeight = isMobile ? 950 : 1050; // Reduced base height for mobile
+    const padding = 20;
     
     const scaleX = (window.innerWidth - padding) / baseWidth;
     const scaleY = (window.innerHeight - padding) / baseHeight;
-    const scale = Math.min(1.5, Math.min(scaleX, scaleY)); // Allow scaling up to 1.5x
+    const scale = Math.min(isMobile ? 1.0 : 1.5, Math.min(scaleX, scaleY));
     
     app.style.transform = `scale(${scale})`;
 }

@@ -531,23 +531,26 @@ class Tetris {
         this.nextCtx.fillStyle = '#000';
         this.nextCtx.fillRect(0, 0, this.nextCanvas.width, this.nextCanvas.height);
 
-        // Calculate dynamic sizes based on canvas width
-        const previewBlockSize = this.nextCanvas.width * 0.18; 
-        const spacing = previewBlockSize * 2.2;
+        const isHorizontal = this.nextCanvas.width > this.nextCanvas.height;
+        const previewBlockSize = isHorizontal ? 12 : (this.nextCanvas.width * 0.18); 
+        const spacing = isHorizontal ? 40 : (previewBlockSize * 2.2);
         
         this.nextQueue.forEach((pieceData, index) => {
-            const offsetY = (previewBlockSize * 1.2) + (index * spacing);
             const scale = index === 0 ? 1 : 0.7; 
             const blockSize = previewBlockSize * 1.1 * scale;
             
             this.nextCtx.save();
             const matrix = pieceData.shape;
             const pieceWidth = matrix[0].length * blockSize;
-            const pieceHeight = matrix.length * blockSize;
             
-            // Center the piece horizontally
-            const startX = (this.nextCanvas.width - pieceWidth) / 2;
-            const startY = offsetY;
+            let startX, startY;
+            if (isHorizontal) {
+                startX = index * spacing + 5;
+                startY = 10;
+            } else {
+                startX = (this.nextCanvas.width - pieceWidth) / 2;
+                startY = (previewBlockSize * 1.2) + (index * spacing);
+            }
 
             matrix.forEach((row, y) => {
                 row.forEach((value, x) => {
@@ -555,11 +558,8 @@ class Tetris {
                         const color = SKIN_CONFIGS[this.skin].colors[pieceData.type];
                         this.nextCtx.shadowBlur = 10;
                         this.nextCtx.shadowColor = color;
-                        
                         this.nextCtx.fillStyle = color;
                         this.nextCtx.fillRect(startX + x * blockSize, startY + y * blockSize, blockSize - 1, blockSize - 1);
-                        
-                        this.nextCtx.shadowBlur = 0;
                     }
                 });
             });
