@@ -433,12 +433,12 @@ h1 {
 .board-wrap.next-piece {
     background: rgba(0, 0, 0, 0.4);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 10px; /* 패딩 축소 */
+    padding: 15px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
-    width: clamp(50px, 15%, 120px); /* 너비 유연하게 조정 */
+    gap: 15px;
+    min-width: 100px;
     height: fit-content;
 }
 
@@ -446,8 +446,22 @@ h1 {
     background: #000;
     border: 1px solid rgba(255, 255, 255, 0.05);
     display: block;
-    width: 100%; /* 부모 너비에 맞게 축소 */
-    height: auto;
+}
+
+/* Desktop Specific Scaling Rules for NEXT Preview */
+@media (min-width: 601px) {
+    .board-wrap.next-piece {
+        padding: 10px;
+        width: clamp(50px, 15%, 120px);
+        min-width: 50px;
+    }
+    .next-preview {
+        width: 100%;
+        height: auto;
+    }
+    .game-layout {
+        margin-top: -10px;
+    }
 }
 
 .board-wrapper {
