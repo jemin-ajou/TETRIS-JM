@@ -25,6 +25,10 @@ class Tetris {
         this.totalLinesCleared = 0;
         this.totalGarbageAdded = 0;
         this.bag = [];
+        this.lockDelayMax = 500; // 500ms delay
+        this.lockDelayCounter = 0;
+        this.lockResetCount = 0;
+        this.maxLockResets = 15;
         this.reset();
     }
 
@@ -81,6 +85,8 @@ class Tetris {
         this.lastRandomShiftScore = 0;
         this.totalLinesCleared = 0;
         this.totalGarbageAdded = 0;
+        this.lockDelayCounter = 0;
+        this.lockResetCount = 0;
 
         this.updateScore();
         this.spawnPiece();
@@ -139,6 +145,7 @@ class Tetris {
             }
         }
         if (typeof audioManager !== 'undefined') audioManager.play('rotate');
+        this.resetLockDelay();
     }
 
     _rotateShape(matrix, dir) {
@@ -157,6 +164,7 @@ class Tetris {
             this.piece.pos.x -= dir;
         } else {
             if (typeof audioManager !== 'undefined') audioManager.play('move');
+            this.resetLockDelay();
         }
     }
 
@@ -176,13 +184,11 @@ class Tetris {
         this.piece.pos.y++;
         if (this.collide()) {
             this.piece.pos.y--;
-            this.merge();
-            if (typeof audioManager !== 'undefined') audioManager.play('land');
-            this.addShake(2, 5);
-            this.spawnPiece();
-            this.clearLines();
+            // Instead of immediate merge, we wait for lock delay in update()
+            this.dropCounter = this.dropInterval; // Force gravity to wait
+        } else {
+            this.dropCounter = 0;
         }
-        this.dropCounter = 0;
     }
 
     hardDrop() {
@@ -580,8 +586,45 @@ class Tetris {
         if (this.dropCounter > this.dropInterval) {
             this.drop();
         }
+
+        // Handle Lock Delay
+        if (this.piece && this.isPieceOnGround()) {
+            this.lockDelayCounter += deltaTime;
+            if (this.lockDelayCounter >= this.lockDelayMax) {
+                this.lockPiece();
+            }
+        } else {
+            this.lockDelayCounter = 0;
+        }
+
         this.draw();
         requestAnimationFrame(this.update.bind(this));
+    }
+
+    isPieceOnGround() {
+        if (!this.piece) return false;
+        this.piece.pos.y++;
+        const onGround = this.collide();
+        this.piece.pos.y--;
+        return onGround;
+    }
+
+    resetLockDelay() {
+        if (this.isPieceOnGround() && this.lockResetCount < this.maxLockResets) {
+            this.lockDelayCounter = 0;
+            this.lockResetCount++;
+        }
+    }
+
+    lockPiece() {
+        if (this.gameOver || !this.piece) return;
+        this.merge();
+        if (typeof audioManager !== 'undefined') audioManager.play('land');
+        this.addShake(2, 5);
+        this.spawnPiece();
+        this.clearLines();
+        this.lockDelayCounter = 0;
+        this.lockResetCount = 0;
     }
 
     _handleModeLogic() {
