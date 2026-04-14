@@ -48,18 +48,27 @@ body {
     height: 100%;
     background: rgba(0, 0, 0, 0.85);
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
+    gap: 20px;
     z-index: 1000;
     backdrop-filter: blur(10px);
-    z-index: 100;
     transition: opacity 0.5s ease, transform 0.5s ease;
 }
 
 .overlay.hidden {
     opacity: 0;
     pointer-events: none;
-    transform: scale(1.1);
+    transform: scale(0.9);
+}
+
+.overlay-button-group {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
 /* Typography */
@@ -550,36 +559,109 @@ canvas {
 .rank-item {
     display: flex;
     align-items: center;
-    gap: 20px;
-    padding: 1rem;
+    gap: 15px;
+    padding: 0.8rem 1rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    opacity: 1; /* Ensure visible */
+    transition: background 0.3s;
+}
+
+.rank-item:hover {
+    background: rgba(255, 255, 255, 0.03);
 }
 
 .rank-pos {
-    width: 30px;
+    width: 40px;
     color: var(--accent);
     font-weight: bold;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    text-align: center;
 }
 
 .rank-name {
     flex: 1;
     color: #fff;
-    font-size: 1.1rem;
+    font-size: 1rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding-left: 5px;
+}
+
+.rank-level {
+    width: 70px;
+    color: #ffd700;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.9rem;
+    text-align: center;
+    flex-shrink: 0;
 }
 
 .rank-score {
+    width: 100px;
     color: var(--primary);
     font-family: 'Orbitron', sans-serif;
     font-weight: bold;
+    text-align: right;
+    font-size: 0.95rem;
+    flex-shrink: 0;
+}
+
+.rank-time {
+    width: 80px;
+    color: var(--accent);
+    font-family: 'Orbitron', sans-serif;
+    text-align: right;
+    font-size: 0.9rem;
+    flex-shrink: 0;
 }
 
 .rank-date {
+    width: 100px;
     color: #666;
     font-size: 0.8rem;
-    width: 100px;
     text-align: right;
+    flex-shrink: 0;
+}
+
+.rank-item.rank-header {
+    background: rgba(0, 242, 255, 0.1);
+    border-bottom: 2px solid var(--primary);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.rank-item.rank-header span {
+    color: var(--primary);
+    font-weight: bold;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+}
+
+@media (max-width: 600px) {
+    .rank-item {
+        gap: 8px;
+        padding: 0.6rem 0.5rem;
+    }
+    .rank-name {
+        font-size: 0.85rem;
+    }
+    .rank-level {
+        width: 45px;
+        font-size: 0.75rem;
+    }
+    .rank-score {
+        font-size: 0.8rem;
+    }
+    .rank-time {
+        width: 60px;
+        font-size: 0.8rem;
+    }
+    .rank-date {
+        width: 70px;
+        font-size: 0.65rem;
+    }
 }
 
 .empty-msg {

@@ -134,6 +134,10 @@ document.querySelectorAll('.rank-tab').forEach(tab => {
 document.getElementById('btn-save-score').addEventListener('click', saveRankAndGoHome);
 document.getElementById('btn-restart').addEventListener('click', restartGame);
 document.getElementById('btn-home').addEventListener('click', goHome);
+document.getElementById('btn-name-home').addEventListener('click', () => {
+    nameInputOverlay.classList.add('hidden');
+    goHome();
+});
 
 // Ghost Toggles (Buttons Restored)
 const p1GhostBtn = document.getElementById('p1-ghost-toggle');
@@ -538,6 +542,7 @@ function saveRankAndGoHome() {
     // 신규 기록 추가
     const record = { 
         name, 
+        level: p1Game.level || 1,
         mode, 
         date: new Date().toLocaleDateString() 
     };
@@ -583,6 +588,20 @@ function renderRankings(container, mode = 'standard') {
         return;
     }
 
+    // 헤더 추가 - 순서: 순위, 이름, 단계, 점수, (시간), 날짜
+    const header = document.createElement('div');
+    header.className = 'rank-item rank-header';
+    header.innerHTML = `
+        <span class="rank-pos">#</span>
+        <span class="rank-name">NAME</span>
+        <span class="rank-level">LEVEL</span>
+        <span class="rank-score">SCORE</span>
+        ${mode === 'sprint' ? '<span class="rank-time">TIME</span>' : ''}
+        <span class="rank-date">DATE</span>
+    `;
+    container.appendChild(header);
+
+    // 정렬 로직
     if (mode === 'sprint') {
         filteredRanks.sort((a, b) => (a.time || 999) - (b.time || 999));
     } else {
@@ -592,18 +611,22 @@ function renderRankings(container, mode = 'standard') {
     filteredRanks.slice(0, 10).forEach((data, index) => {
         const item = document.createElement('div');
         item.className = 'rank-item';
-        let displayValue = "";
-        if (mode === 'sprint') {
-            const timeVal = parseFloat(data.time) || (data.score > 0 ? 0 : 999.99); 
-            displayValue = timeVal.toFixed(2) + "s";
-        } else {
-            displayValue = (data.score || 0).toLocaleString();
-        }
         
+        const scoreVal = (data.score || 0).toLocaleString();
+        const levelVal = "LV." + (data.level || 1);
+        
+        let timeHTML = "";
+        if (mode === 'sprint') {
+            const t = parseFloat(data.time) || 0;
+            timeHTML = `<span class="rank-time">${t.toFixed(2)}s</span>`;
+        }
+
         item.innerHTML = `
             <span class="rank-pos">${index + 1}</span>
             <span class="rank-name">${data.name}</span>
-            <span class="rank-score">${displayValue}</span>
+            <span class="rank-level">${levelVal}</span>
+            <span class="rank-score">${scoreVal}</span>
+            ${timeHTML}
             <span class="rank-date">${data.date}</span>
         `;
         container.appendChild(item);
