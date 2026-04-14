@@ -33,9 +33,9 @@ const playerNameInput = document.getElementById('player-name-input');
 
 // Sensitivity Configuration
 const SENSITIVITY_CONFIG = {
-    high: { das: 120, arr: 30 },
-    medium: { das: 180, arr: 60 },
-    low: { das: 250, arr: 100 }
+    high: { das: 100, arr: 25 },  // 매우 빠름
+    medium: { das: 150, arr: 45 }, // 기본값 (상향)
+    low: { das: 200, arr: 80 }     // 느림 (상향)
 };
 
 let currentSensitivity = localStorage.getItem('tetris_sensitivity') || 'medium';

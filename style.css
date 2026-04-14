@@ -783,15 +783,15 @@ body.skin-light .toggle-btn.active, body.skin-light .bgm-toggle-btn.active, body
     }
 
     #game-container {
-        flex-direction: column; /* 세로 배치로 변경 */
+        flex-direction: column; 
         flex-wrap: nowrap;
         justify-content: flex-start;
         align-items: center;
-        gap: 15px; 
+        gap: 5px; /* 간격 축소 */
         padding: 5px;
         height: 100vh;
-        overflow-y: auto; /* 세로 스크롤 허용 */
-        overflow-x: hidden;
+        overflow: hidden; /* 강제 스크롤 방지 */
+        position: relative;
     }
 
     /* 모바일 AI 배틀: 위아래로 넓게 배치 */
@@ -819,49 +819,59 @@ body.skin-light .toggle-btn.active, body.skin-light .bgm-toggle-btn.active, body
         width: 100%;
         display: flex;
         justify-content: space-between;
-        gap: 2px;
+        gap: 5px;
         order: -1;
+        margin-bottom: 5px;
     }
 
     .stat-box {
-        padding: 2px;
+        padding: 4px;
         min-width: 0;
         flex: 1;
-        border-left-width: 2px;
+        background: rgba(0, 0, 0, 0.3);
+        border-left: 2px solid var(--primary);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
 
-    .stat-box label { font-size: 0.4rem; }
-    .stat-box span { font-size: 0.7rem; }
+    .stat-box label { font-size: 0.5rem; letter-spacing: 1px; }
+    .stat-box span { font-size: 0.8rem; }
 
-    /* Board sizing: Maximized */
-    /* Board sizing: 세로 배치에 맞춰 높이 조정 */
+    /* Board sizing: 화면 비율에 맞춰 동적 조정 */
     #p1-board, #p2-board {
-        height: 35vh; /* 세로 두 개 배치를 위해 높이 축소 */
+        height: 42vh; /* 싱글 모드 기본 높이 */
         width: auto;
-        max-width: 90vw; 
-        margin-top: 5px;
+        max-width: 85vw; 
+        margin-top: 0;
         flex: none;
+        object-fit: contain;
+    }
+
+    /* AI Battle 모드일 때 보드 높이 축소 (두 개를 넣어야 하므로) */
+    #game-container:not(.single-active) #p1-board,
+    #game-container:not(.single-active) #p2-board {
+        height: 31vh; 
     }
 
     .board-wrap.next-piece {
         flex-direction: column;
-        width: 45px;
+        width: 38px;
         padding: 0;
-        gap: 2px;
+        gap: 0;
         order: -1; 
         background: transparent;
         border: none;
-        margin-left: 5px; /* Push near the edge */
+        margin-left: 2px;
     }
 
     .board-wrap.next-piece label {
-        font-size: 0.6rem;
-        color: #888;
+        display: none;
     }
 
     .next-preview {
-        width: 35px !important;
-        height: 140px !important;
+        width: 32px !important;
+        height: 128px !important;
     }
 
     .game-controls {
@@ -875,14 +885,12 @@ body.skin-light .toggle-btn.active, body.skin-light .bgm-toggle-btn.active, body
         flex-direction: row;
         align-items: center;
         justify-content: center;
-        gap: 15px;
+        gap: 8px; /* 간격 최적화 */
         width: 100%;
-        margin-top: 0;
-        padding: 10px 5px 20px 5px;
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        background: rgba(0,0,0,0.9);
+        margin-top: auto; /* 하단 밀착 */
+        padding: 10px 5px 25px 5px;
+        position: relative; /* fixed에서 relative로 변경하여 레이아웃 흐름에 편입 */
+        background: rgba(0,0,0,0.5);
         z-index: 200;
         flex-wrap: nowrap;
     }
