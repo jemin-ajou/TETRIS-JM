@@ -4,6 +4,12 @@ let aiEngine = null;
 let isAiMode = false;
 let currentDifficulty = 'medium';
 
+// 터치 디바이스 감지 (데스크톱 가상 버튼 노출 제어용)
+const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+if (isTouchDevice) {
+    document.body.classList.add('has-touch');
+}
+
 const mainMenu = document.getElementById('main-menu');
 const gameContainer = document.getElementById('game-container');
 const gameOverOverlay = document.getElementById('game-over');
@@ -46,19 +52,28 @@ function handleResize() {
     const isMobile = window.innerWidth < 600;
     
     if (isMobile) {
-        app.style.transform = 'none'; // No scaling on mobile, use responsive CSS
+        app.style.transform = 'none'; 
         return;
     }
 
-    const baseWidth = isAiMode ? 1400 : 850;
-    const baseHeight = 1050;
-    const padding = 40;
+    // 데스크톱 스케일링 최적화: 모니터 크기에 맞춰 화면을 최대한 시원하게 확대
+    const baseWidth = isAiMode ? 1200 : 550; // 기준 너비를 더 좁게 잡아 확대를 유도
+    const baseHeight = 800; // 기준 높이를 더 낮게 잡아 확대를 유도
+    const padding = 10;
     
     const scaleX = (window.innerWidth - padding) / baseWidth;
     const scaleY = (window.innerHeight - padding) / baseHeight;
-    const scale = Math.min(1.5, Math.min(scaleX, scaleY));
+    const scale = Math.min(2.5, Math.min(scaleX, scaleY)); // 최대 2.5배까지 확대
     
+    app.style.transformOrigin = 'center center'; 
     app.style.transform = `scale(${scale})`;
+    
+    // 중앙 정렬 보정
+    if (scale < 1) {
+        app.style.marginTop = '20px';
+    } else {
+        app.style.marginTop = '0';
+    }
 }
 
 window.addEventListener('resize', handleResize);
@@ -684,13 +699,43 @@ function setupTouchControls() {
         'touch-hard-drop': P1_KEYS.HARD_DROP
     };
 
+    const touchTimers = {};
+    const touchIntervals = {};
+
     Object.entries(touchMappings).forEach(([id, key]) => {
         const btn = document.getElementById(id);
         if (btn) {
+            // 터치 시작
             btn.addEventListener('touchstart', (e) => {
                 e.preventDefault();
                 handleAction(key);
-            });
+
+                // 방향키 및 하단키의 경우 연속 입력 처리
+                if (key === P1_KEYS.LEFT || key === P1_KEYS.RIGHT || key === P1_KEYS.DOWN) {
+                    const config = SENSITIVITY_CONFIG[currentSensitivity];
+                    
+                    touchTimers[id] = setTimeout(() => {
+                        touchIntervals[id] = setInterval(() => {
+                            handleAction(key);
+                        }, config.arr);
+                    }, config.das);
+                }
+            }, { passive: false });
+
+            // 터치 종료
+            const stopTouch = (e) => {
+                if (touchTimers[id]) {
+                    clearTimeout(touchTimers[id]);
+                    delete touchTimers[id];
+                }
+                if (touchIntervals[id]) {
+                    clearInterval(touchIntervals[id]);
+                    delete touchIntervals[id];
+                }
+            };
+
+            btn.addEventListener('touchend', stopTouch);
+            btn.addEventListener('touchcancel', stopTouch);
         }
     });
 }
