@@ -57,23 +57,21 @@ function handleResize() {
     }
 
     // 데스크톱 스케일링 최적화: 모니터 크기에 맞춰 화면을 최대한 시원하게 확대
-    const baseWidth = isAiMode ? 1200 : 550; // 기준 너비를 더 좁게 잡아 확대를 유도
-    const baseHeight = 800; // 기준 높이를 더 낮게 잡아 확대를 유도
-    const padding = 10;
+    const baseWidth = isAiMode ? 1200 : 550; 
+    const baseHeight = 950; // 실제 콘텐츠 높이(보드 700px + 통계/설정 영역)에 맞춰 상향 조정
+    const padding = 20;
     
     const scaleX = (window.innerWidth - padding) / baseWidth;
     const scaleY = (window.innerHeight - padding) / baseHeight;
-    const scale = Math.min(2.5, Math.min(scaleX, scaleY)); // 최대 2.5배까지 확대
+    const scale = Math.min(2.5, Math.min(scaleX, scaleY)); 
     
-    app.style.transformOrigin = 'center center'; 
+    app.style.transformOrigin = 'top center'; // 상단 중앙 기준 확대 (잘림 방지에 더 유리)
     app.style.transform = `scale(${scale})`;
     
-    // 중앙 정렬 보정
-    if (scale < 1) {
-        app.style.marginTop = '20px';
-    } else {
-        app.style.marginTop = '0';
-    }
+    // 중앙 정렬 보정 (상단 여백)
+    const scaledHeight = baseHeight * scale;
+    const marginTop = Math.max(0, (window.innerHeight - scaledHeight) / 2);
+    app.style.marginTop = `${marginTop}px`;
 }
 
 window.addEventListener('resize', handleResize);
