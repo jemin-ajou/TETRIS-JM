@@ -9,11 +9,13 @@ class TetrisAI {
         this.isMoving = false;
         
         this.settings = {
-            easy: { delay: 540, mistakeRatio: 0.18, speed: 315, reaction: 540 },
-            medium: { delay: 360, mistakeRatio: 0.09, speed: 162, reaction: 315 },
-            hard: { delay: 150, mistakeRatio: 0, speed: 60, reaction: 120 },
-            boss: { delay: 50, mistakeRatio: 0, speed: 20, reaction: 30 }
+            easy: { delay: 540, mistakeRatio: 0.10, speed: 400, reaction: 600 },
+            medium: { delay: 360, mistakeRatio: 0.05, speed: 200, reaction: 350 },
+            hard: { delay: 150, mistakeRatio: 0.02, speed: 100, reaction: 180 },
+            boss: { delay: 50, mistakeRatio: 0, speed: 45, reaction: 100 }
         };
+
+        this.currentActionInterval = 500;
 
         this.reactionTimer = 0;
         this.isThinking = false;
@@ -23,6 +25,7 @@ class TetrisAI {
     setDifficulty(level) {
         this.difficulty = level;
         this.actionInterval = this.settings[level].speed;
+        this.currentActionInterval = this.actionInterval;
     }
 
     // Heuristic Weights
@@ -65,9 +68,13 @@ class TetrisAI {
         const stackHeight = this.getColumnHeights(this.game.board).reduce((a, b) => Math.max(a, b), 0);
         if (stackHeight > ROWS * 0.6) urgencyModifier = 0.5; // 2배 빠름 (2x faster)
 
-        if (time - this.lastActionTime > (this.actionInterval * urgencyModifier)) {
+        if (time - this.lastActionTime > (this.currentActionInterval * urgencyModifier)) {
             this.executeNextAction();
             this.lastActionTime = time;
+            
+            // 다음 동작을 위한 지터(Jitter) 계산: ±15% 무작위성 부여
+            const jitter = 0.85 + Math.random() * 0.3;
+            this.currentActionInterval = this.actionInterval * jitter;
         }
     }
 
@@ -114,15 +121,23 @@ class TetrisAI {
             }
         }
 
-        // 인간적인 실수 (Human mistakes)
-        if (Math.random() < this.settings[this.difficulty].mistakeRatio) {
-            const mistake = Math.random();
-            if (mistake < 0.5) bestMove.x += (Math.random() > 0.5 ? 1 : -1);
-            else bestMove.rotation = (bestMove.rotation + 1) % 4;
-        }
-
         this.targetX = bestMove.x;
         this.targetRotation = bestMove.rotation;
+
+        // 인간적인 실수 (Human mistakes)
+        if (Math.random() < this.settings[this.difficulty].mistakeRatio) {
+            const mistakeType = Math.random();
+            if (mistakeType < 0.4) {
+                // 1. 위치 실수 (Position mistake)
+                this.targetX += (Math.random() > 0.5 ? 1 : -1);
+            } else if (mistakeType < 0.7) {
+                // 2. 회전 실수 (Rotation mistake)
+                this.targetRotation = (this.targetRotation + 1) % 4;
+            } else {
+                // 3. 오버슈트 후 당황 (Overshoot & panic - wrong side entirely)
+                this.targetX = Math.floor(Math.random() * COLS);
+            }
+        }
     }
 
     getVirtualBoard(board, px, py, shape) {

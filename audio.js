@@ -1,18 +1,30 @@
 class AudioManager {
     constructor() {
         this.ctx = null;
-        this.sfxMuted = localStorage.getItem('tetris_sfx_muted') === 'true';
+        try {
+            this.sfxMuted = localStorage.getItem('tetris_sfx_muted') === 'true';
+        } catch (e) {
+            this.sfxMuted = false;
+        }
         this.masterGain = null;
         this.noiseBuffer = null;
     }
 
     init() {
         if (this.ctx) return;
-        this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-        this.masterGain = this.ctx.createGain();
-        this.masterGain.connect(this.ctx.destination);
-        this._createNoiseBuffer();
-        this.updateVolume();
+        try {
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (AudioContextClass) {
+                this.ctx = new AudioContextClass();
+                this.masterGain = this.ctx.createGain();
+                this.masterGain.connect(this.ctx.destination);
+                this._createNoiseBuffer();
+                this.updateVolume();
+            }
+        } catch (e) {
+            console.warn('AudioContext failed to initialize:', e);
+            this.ctx = null;
+        }
     }
 
     _createNoiseBuffer() {

@@ -4,7 +4,7 @@ let aiEngine = null;
 let isAiMode = false;
 let currentDifficulty = 'medium';
 
-// 터치 디바이스 감지 (데스크톱 가상 버튼 노출 제어용)
+// Touch device detection
 const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
 if (isTouchDevice) {
     document.body.classList.add('has-touch');
@@ -29,46 +29,56 @@ const rankingOverlay = document.getElementById('ranking-overlay');
 const rankListContent = document.getElementById('rank-list-content');
 const nameInputOverlay = document.getElementById('name-input-overlay');
 const playerNameInput = document.getElementById('player-name-input');
-// const app = document.getElementById('app'); // 제거: HTML에 없음
 
 // Sensitivity Configuration
 const SENSITIVITY_CONFIG = {
-    high: { das: 100, arr: 25 },  // 매우 빠름
-    medium: { das: 150, arr: 45 }, // 기본값 (상향)
-    low: { das: 200, arr: 80 }     // 느림 (상향)
+    high: { das: 100, arr: 25 },
+    medium: { das: 150, arr: 45 },
+    low: { das: 200, arr: 80 }
 };
 
 let currentSensitivity = localStorage.getItem('tetris_sensitivity') || 'medium';
 let currentSkin = localStorage.getItem('tetris_skin') || 'neon';
 let currentGameMode = 'standard';
 
+// Initial Rank Reset
+if (!localStorage.getItem('tetris_ranked_reset_completed')) {
+    localStorage.removeItem('tetris_rankings');
+    localStorage.removeItem('tetris_scores');
+    localStorage.setItem('tetris_ranked_reset_completed', 'true');
+}
+
 const keysPressed = new Set();
 const keyTimers = {};
 const keyRepeatIntervals = {};
 
-// Dynamic Scaling Logic
-// Dynamic Scaling Logic
+// Optimized Scaling Logic
 function handleResize() {
     const isMobile = window.innerWidth < 600;
     
     if (isMobile) {
-        app.style.transform = 'none'; 
+        if (app) {
+            app.style.transform = 'none'; 
+            app.style.marginTop = '0';
+        }
         return;
     }
 
-    // 데스크톱 스케일링 최적화: 모니터 크기에 맞춰 화면을 최대한 시원하게 확대
-    const baseWidth = isAiMode ? 1200 : 550; 
-    const baseHeight = 950; // 실제 콘텐츠 높이(보드 700px + 통계/설정 영역)에 맞춰 상향 조정
+    if (!app) return;
+
+    // Set base dimensions for scaling
+    const baseWidth = isAiMode ? 1150 : 560; 
+    const baseHeight = 1000; 
     const padding = 20;
     
     const scaleX = (window.innerWidth - padding) / baseWidth;
     const scaleY = (window.innerHeight - padding) / baseHeight;
     const scale = Math.min(2.5, Math.min(scaleX, scaleY)); 
     
-    app.style.transformOrigin = 'top center'; // 상단 중앙 기준 확대 (잘림 방지에 더 유리)
+    app.style.transformOrigin = 'top center'; 
     app.style.transform = `scale(${scale})`;
     
-    // 중앙 정렬 보정 (상단 여백)
+    // Vertical centering
     const scaledHeight = baseHeight * scale;
     const marginTop = Math.max(0, (window.innerHeight - scaledHeight) / 2);
     app.style.marginTop = `${marginTop}px`;
@@ -80,8 +90,6 @@ window.addEventListener('resize', handleResize);
 const menuMainTier = document.getElementById('menu-main-tier');
 const menuSingleTier = document.getElementById('menu-single-tier');
 const menuAiTier = document.getElementById('menu-ai-tier');
-
-// document.getElementById('btn-nav-single') listener...
 
 document.getElementById('btn-nav-single').addEventListener('click', () => {
     menuMainTier.classList.add('hidden');
@@ -113,10 +121,17 @@ document.getElementById('btn-rank-close').addEventListener('click', () => {
     rankingOverlay.classList.add('hidden');
 });
 
+const manualOverlay = document.getElementById('manual-overlay');
+document.getElementById('btn-nav-manual').addEventListener('click', () => {
+    manualOverlay.classList.remove('hidden');
+});
+document.getElementById('btn-manual-close').addEventListener('click', () => {
+    manualOverlay.classList.add('hidden');
+});
+
 function showRankingModal(mode = 'standard') {
     rankingOverlay.classList.remove('hidden');
-    rankingOverlay.style.display = 'flex'; // Ensure flex is applied
-    // Update tabs UI
+    rankingOverlay.style.display = 'flex';
     document.querySelectorAll('.rank-tab').forEach(tab => {
         tab.classList.toggle('active', tab.dataset.mode === mode);
     });
@@ -138,8 +153,12 @@ document.getElementById('btn-name-home').addEventListener('click', () => {
     nameInputOverlay.classList.add('hidden');
     goHome();
 });
+document.getElementById('btn-name-restart').addEventListener('click', () => {
+    nameInputOverlay.classList.add('hidden');
+    restartGame();
+});
 
-// Ghost Toggles (Buttons Restored)
+// Ghost Toggles
 const p1GhostBtn = document.getElementById('p1-ghost-toggle');
 const p2GhostBtn = document.getElementById('p2-ghost-toggle');
 
@@ -153,7 +172,7 @@ function toggleGhost(game, btn) {
     btn.innerText = `GHOST: ${game.showGhost ? 'ON' : 'OFF'}`;
 }
 
-// In-game Skin Select Box (Sync multiple instances)
+// In-game Skin Select Box
 const inGameSkinSelects = document.querySelectorAll('.in-game-skin-select');
 inGameSkinSelects.forEach(select => {
     select.addEventListener('change', () => {
@@ -162,15 +181,14 @@ inGameSkinSelects.forEach(select => {
     });
 });
 
-// Sound Toggles (Sync multiple instances)
+// Sound Toggles
 const sfxToggleBtns = document.querySelectorAll('.sfx-toggle-btn');
 
 function updateSoundUI() {
     const sfxMuted = audioManager.sfxMuted;
-    
     sfxToggleBtns.forEach(btn => {
         btn.classList.toggle('muted', sfxMuted);
-        btn.innerText = sfxMuted ? '🔇' : '🔊';
+        btn.innerText = sfxMuted ? 'SOUND: OFF' : 'SOUND: ON';
     });
 }
 
@@ -182,14 +200,13 @@ sfxToggleBtns.forEach(btn => {
     });
 });
 
-// Global & In-game Sensitivity Logic
+// Sensitivity Logic
 const inputSpeedSelects = document.querySelectorAll('.input-speed-select');
 inputSpeedSelects.forEach(select => {
     select.value = currentSensitivity;
     select.addEventListener('change', () => {
         currentSensitivity = select.value;
         localStorage.setItem('tetris_sensitivity', currentSensitivity);
-        // Sync ALL instances of sensitivity select
         inputSpeedSelects.forEach(s => s.value = currentSensitivity);
     });
 });
@@ -200,7 +217,7 @@ skinBtns.forEach(btn => {
     else btn.classList.remove('active');
     
     btn.addEventListener('click', (e) => {
-        e.stopPropagation(); // Avoid triggering mode card if accidentally overlapping
+        e.stopPropagation();
         const skin = btn.dataset.skin;
         changeSkin(skin);
     });
@@ -212,16 +229,32 @@ function changeSkin(skin) {
     document.body.classList.remove('skin-neon', 'skin-classic', 'skin-dark', 'skin-light');
     document.body.classList.add(`skin-${skin}`);
     
-    // Sync Select Box
     const skinSelect = document.getElementById('skin-select');
     if (skinSelect) skinSelect.value = skin;
     
     if (p1Game) p1Game.skin = skin;
     if (p2Game) p2Game.skin = skin;
-    document.querySelectorAll('.in-game-skin-select').forEach(select => select.value = skin);
 }
 
-// Initial Listener Setup for Select Boxes
+function cycleSkin() {
+    const skins = ['neon', 'classic', 'dark', 'light'];
+    const currentIndex = skins.indexOf(currentSkin);
+    const nextIndex = (currentIndex + 1) % skins.length;
+    changeSkin(skins[nextIndex]);
+}
+
+function cycleSensitivity() {
+    const levels = ['low', 'medium', 'high'];
+    const currentIndex = levels.indexOf(currentSensitivity);
+    const nextIndex = (currentIndex + 1) % levels.length;
+    currentSensitivity = levels[nextIndex];
+    localStorage.setItem('tetris_sensitivity', currentSensitivity);
+    inputSpeedSelects.forEach(s => s.value = currentSensitivity);
+}
+
+// Initial Skin Setup
+changeSkin(currentSkin);
+
 const skinSelect = document.getElementById('skin-select');
 if (skinSelect) {
     skinSelect.value = currentSkin;
@@ -230,11 +263,6 @@ if (skinSelect) {
         changeSkin(skinSelect.value);
     });
 }
-
-// Sync in-game selects
-document.querySelectorAll('.in-game-skin-select').forEach(select => {
-    select.addEventListener('change', () => changeSkin(select.value));
-});
 
 // Pause Logic
 const pauseToggleBtns = document.querySelectorAll('.pause-toggle-btn');
@@ -247,106 +275,115 @@ pauseToggleBtns.forEach(btn => {
 
 function toggleAllPause() {
     const isPaused = p1Game ? !p1Game.paused : false;
-    
     if (p1Game) p1Game.togglePause();
     if (p2Game) p2Game.togglePause();
 
     pauseToggleBtns.forEach(btn => {
         btn.classList.toggle('active', isPaused);
-        btn.innerText = isPaused ? '▶️' : '⏸️';
+        btn.innerText = isPaused ? 'RESUME' : 'PAUSE';
     });
 }
 
-// Initial UI sync
 updateSoundUI();
-changeSkin(currentSkin); // Apply saved skin
 
-// AI Difficulty Selection (In-Tier Cards)
-document.querySelectorAll('.diff-card').forEach(card => {
-    card.addEventListener('click', () => {
-        audioManager.init();
-        const level = card.dataset.level;
-        currentDifficulty = level;
-        menuAiTier.classList.add('hidden');
-        startMode('ai');
-    });
+// Event Delegation for Mode and Difficulty Cards
+document.addEventListener('click', (e) => {
+    const modeCard = e.target.closest('.mode-card');
+    const diffCard = e.target.closest('.diff-card');
+
+    if (modeCard) {
+        const mode = modeCard.dataset.mode;
+        if (mode) {
+            try { audioManager.init(); } catch (err) {}
+            startMode(mode);
+        }
+        return;
+    }
+
+    if (diffCard) {
+        const level = diffCard.dataset.level;
+        if (level) {
+            try { audioManager.init(); } catch (err) {}
+            currentDifficulty = level;
+            menuAiTier.classList.add('hidden');
+            startMode('ai');
+        }
+        return;
+    }
 });
-
-// Mode Card Selection (within Single Tier)
-const modeCards = document.querySelectorAll('.mode-card');
-modeCards.forEach(card => {
-    card.addEventListener('click', () => {
-        audioManager.init();
-        const mode = card.dataset.mode;
-        startMode(mode);
-    });
-});
-
-function showDifficultySelector() {
-    menuAiTier.classList.remove('hidden');
-}
-
-function hideDifficultySelector() {
-    menuAiTier.classList.add('hidden');
-}
 
 function startMode(mode) {
+    if (!mode) return;
+    
+    if (mainMenu) mainMenu.classList.add('hidden');
+    if (gameContainer) gameContainer.classList.remove('hidden');
+    if (gameOverOverlay) gameOverOverlay.classList.add('hidden');
+    if (menuSingleTier) menuSingleTier.classList.add('hidden');
+    if (menuMainTier) menuMainTier.classList.remove('hidden');
+
     currentGameMode = mode;
     isAiMode = (mode === 'ai');
-    mainMenu.classList.add('hidden');
-    gameContainer.classList.remove('hidden');
-    gameOverOverlay.classList.add('hidden');
-    
-    // Reset menu tiers for next time
-    menuSingleTier.classList.add('hidden');
-    menuMainTier.classList.remove('hidden');
 
-    if (isAiMode) {
-        p2Area.classList.remove('hidden');
-        p1ModeInfoBox.classList.add('hidden');
-        p1ExtraInfoBox.classList.add('hidden');
-        gameContainer.classList.remove('single-active');
-        initAiMode();
-    } else {
-        p2Area.classList.add('hidden');
-        
-        // Show/Hide mode info boxes based on mode
-        if (mode === 'sprint') {
-            p1ModeInfoBox.classList.remove('hidden');
-            p1ModeInfoLabel.innerText = 'LINES LEFT';
-            p1ExtraInfoBox.classList.add('hidden');
-            p1TimerBox.classList.remove('hidden');
-        } else if (mode === 'rising') {
-            p1ModeInfoBox.classList.remove('hidden');
-            p1ModeInfoLabel.innerText = 'CLEARED';
-            p1ExtraInfoBox.classList.remove('hidden');
-            p1ExtraInfoLabel.innerText = 'ADDED';
-            p1TimerBox.classList.add('hidden');
+    try {
+        if (isAiMode) {
+            if (p2Area) p2Area.classList.remove('hidden');
+            if (p1ModeInfoBox) p1ModeInfoBox.classList.add('hidden');
+            if (p1ExtraInfoBox) p1ExtraInfoBox.classList.add('hidden');
+            if (p1TimerBox) p1TimerBox.classList.add('hidden');
+            gameContainer.classList.remove('single-active');
+            initAiMode();
         } else {
-            p1ModeInfoBox.classList.add('hidden');
-            p1ExtraInfoBox.classList.add('hidden');
-            p1TimerBox.classList.add('hidden');
+            if (p2Area) p2Area.classList.add('hidden');
+            gameContainer.classList.add('single-active');
+
+            const showInfo = {
+                sprint: { label: 'LINES LEFT', extra: false, timer: true },
+                timeattack: { label: '', extra: false, timer: true },
+                rising: { label: 'CLEARED', extra: true, timer: false },
+                standard: { label: '', extra: false, timer: false },
+                random: { label: '', extra: false, timer: false },
+                penta: { label: '', extra: false, timer: false }
+            };
+
+            const config = showInfo[mode] || showInfo.standard;
+            if (p1ModeInfoBox) {
+                p1ModeInfoBox.classList.toggle('hidden', !config.label);
+                if (config.label && p1ModeInfoLabel) p1ModeInfoLabel.innerText = config.label;
+            }
+            if (p1ExtraInfoBox) {
+                p1ExtraInfoBox.classList.toggle('hidden', !config.extra);
+                if (config.extra && p1ExtraInfoLabel) p1ExtraInfoLabel.innerText = 'ADDED';
+            }
+            if (p1TimerBox) p1TimerBox.classList.toggle('hidden', !config.timer);
+
+            initSingleMode(mode);
         }
         
-        initSingleMode(mode);
-        gameContainer.classList.add('single-active');
+        syncCanvasResolution();
+        handleResize();
+    } catch (err) {
+        console.error('Failed to start mode:', err);
+        if (mainMenu) mainMenu.classList.remove('hidden');
     }
-    
-    // Fix next canvas resolution for mobile
+}
+
+function syncCanvasResolution() {
     const isMobile = window.innerWidth < 600;
-    const nextCanvases = [document.getElementById('p1-next'), document.getElementById('p2-next')];
-    nextCanvases.forEach(canvas => {
-        if (!canvas) return;
-        if (isMobile) {
-            canvas.width = 40;
-            canvas.height = 160;
-        } else {
-            canvas.width = 80;
-            canvas.height = 320;
+    const canvases = [
+        { id: 'p1-next', w: 100, h: 320 },
+        { id: 'p2-next', w: 100, h: 320 },
+        { id: 'p1-hold', w: 100, h: 120 },
+        { id: 'p2-hold', w: 100, h: 120 }
+    ];
+
+    canvases.forEach(c => {
+        const el = document.getElementById(c.id);
+        if (el) {
+            const isSide = ['p1-hold', 'p2-hold', 'p1-next', 'p2-next'].includes(c.id);
+            el.width = (isMobile && !isSide) ? c.w / 2 : c.w;
+            el.height = (isMobile && !isSide) ? c.h / 2 : c.h;
         }
     });
-
-    handleResize();
 }
 
 function initSingleMode(mode) {
@@ -355,6 +392,7 @@ function initSingleMode(mode) {
     p1Game = new Tetris(
         document.getElementById('p1-board'),
         document.getElementById('p1-next'),
+        document.getElementById('p1-hold'),
         document.getElementById('p1-score'),
         document.getElementById('p1-level'),
         () => handleGameOver('GAME OVER'),
@@ -378,7 +416,6 @@ function initSingleMode(mode) {
             }
         }
         
-        // Mode specific UI updates (triggered on score change)
         if (p1Game.mode === 'sprint') {
             p1ModeInfoValue.innerText = Math.max(0, 40 - p1Game.totalLinesCleared);
         } else if (p1Game.mode === 'rising') {
@@ -393,10 +430,10 @@ function initSingleMode(mode) {
 function initAiMode() {
     const skin = currentSkin;
 
-    // Player 1
     p1Game = new Tetris(
         document.getElementById('p1-board'),
         document.getElementById('p1-next'),
+        document.getElementById('p1-hold'),
         document.getElementById('p1-score'),
         document.getElementById('p1-level'),
         () => handleGameOver('AI WINS!'),
@@ -404,6 +441,7 @@ function initAiMode() {
             if (lines >= 2 && p2Game) p2Game.addGarbage(lines - 1);
         }
     );
+    p1Game.mode = 'ai';
     p1Game.skin = skin;
     p1Game.showGhost = p1GhostBtn.classList.contains('active');
     p1Game.comboElement = document.getElementById('p1-combo');
@@ -420,10 +458,10 @@ function initAiMode() {
         }
     };
 
-    // AI (Player 2)
     p2Game = new Tetris(
         document.getElementById('p2-board'),
         document.getElementById('p2-next'),
+        document.getElementById('p2-hold'),
         document.getElementById('p2-score'),
         document.getElementById('p2-level'),
         () => handleGameOver('PLAYER 1 WINS!'),
@@ -431,6 +469,7 @@ function initAiMode() {
             if (lines >= 2 && p1Game) p1Game.addGarbage(lines - 1);
         }
     );
+    p2Game.mode = 'ai';
     p2Game.skin = skin;
     p2Game.showGhost = p2GhostBtn.classList.contains('active');
     p2Game.comboElement = document.getElementById('p2-combo');
@@ -453,7 +492,6 @@ function initAiMode() {
     p1Game.update();
     p2Game.update();
     
-    // Inject AI into the loop
     const originalUpdate = p2Game.update.bind(p2Game);
     p2Game.update = (time) => {
         aiEngine.update(time);
@@ -473,7 +511,6 @@ function handleGameOver(winner) {
         finalMsg.style.display = 'block';
         finalVal.innerText = p1Game.score;
         
-        // 랭킹 등록 가능 여부 확인 (점수와 모드 전달)
         if (checkRankingRecord(p1Game.score, p1Game.mode)) {
             setTimeout(() => {
                 nameInputOverlay.classList.remove('hidden');
@@ -487,7 +524,6 @@ function handleGameOver(winner) {
     if (p2Game) p2Game.gameOver = true;
 }
 
-// Ranking Logic
 function checkRankingRecord(score, mode) {
     if (score < 0) return false;
     const allRanks = getRankings();
@@ -495,10 +531,10 @@ function checkRankingRecord(score, mode) {
     
     if (mode === 'sprint') {
         const time = parseFloat(p1Game.timeTaken) || 999.99;
-        modeRanks.sort((a, b) => a.time - b.time); // 시간은 낮을수록 좋음
-        return modeRanks.length < 10 || time < modeRanks[modeRanks.length - 1].time;
+        modeRanks.sort((a, b) => a.time - b.time);
+        return modeRanks.length < 10 || time < (modeRanks[modeRanks.length - 1].time || 999);
     } else {
-        modeRanks.sort((a, b) => b.score - a.score); // 점수는 높을수록 좋음
+        modeRanks.sort((a, b) => b.score - a.score);
         return modeRanks.length < 10 || score > (modeRanks[modeRanks.length - 1].score || 0);
     }
 }
@@ -507,39 +543,32 @@ function getRankings() {
     let data = localStorage.getItem('tetris_rankings');
     let ranks = data ? JSON.parse(data) : [];
     
-    // 구버전 데이터(tetris_scores)가 있다면 마이그레이션 시도
     const oldData = localStorage.getItem('tetris_scores');
     if (oldData) {
         try {
             const oldRanks = JSON.parse(oldData);
             if (Array.isArray(oldRanks)) {
                 oldRanks.forEach(r => {
-                    // 모드가 없으면 'standard'로 부여
                     if (!r.mode) r.mode = 'standard';
                     ranks.push(r);
                 });
             }
-            localStorage.removeItem('tetris_scores'); // 마이그레이션 후 삭제
+            localStorage.removeItem('tetris_scores');
         } catch (e) {
             console.error("Failed to migrate old rankings");
         }
     }
     
-    // 데이터 보정: 모드가 없는 기록은 기본값 부여
-    ranks.forEach(r => {
-        if (!r.mode) r.mode = 'standard';
-    });
-    
+    ranks.forEach(r => { if (!r.mode) r.mode = 'standard'; });
     return ranks;
 }
 
 function saveRankAndGoHome() {
     const name = playerNameInput.value.trim() || 'NONAME';
     const score = p1Game.score;
-    const mode = p1Game.mode || currentGameMode || 'standard'; // 다중 안전장치
+    const mode = p1Game.mode || currentGameMode || 'standard';
     let allRanks = getRankings();
     
-    // 신규 기록 추가
     const record = { 
         name, 
         level: p1Game.level || 1,
@@ -549,15 +578,14 @@ function saveRankAndGoHome() {
     
     if (mode === 'sprint') {
         record.time = parseFloat(p1Game.timeTaken) || 0;
-        record.score = p1Game.score; // 점수도 참고용으로 저장
+        record.score = p1Game.score;
     } else {
         record.score = p1Game.score;
     }
     
     allRanks.push(record);
     
-    // 전체 기록 중 각 모드별로 상위 10개만 유지하도록 정리
-    const modes = ['standard', 'sprint', 'random', 'rising'];
+    const modes = ['standard', 'sprint', 'random', 'rising', 'timeattack', 'penta'];
     let finalRanks = [];
     
     modes.forEach(m => {
@@ -571,7 +599,6 @@ function saveRankAndGoHome() {
     });
     
     localStorage.setItem('tetris_rankings', JSON.stringify(finalRanks));
-    
     nameInputOverlay.classList.add('hidden');
     goHome();
 }
@@ -579,8 +606,6 @@ function saveRankAndGoHome() {
 function renderRankings(container, mode = 'standard') {
     const allRanks = getRankings();
     container.innerHTML = '';
-    
-    // 해당 모드의 기록만 필터링
     const filteredRanks = allRanks.filter(r => r.mode === mode);
     
     if (filteredRanks.length === 0) {
@@ -588,7 +613,6 @@ function renderRankings(container, mode = 'standard') {
         return;
     }
 
-    // 헤더 추가 - 순서: 순위, 이름, 단계, 점수, (시간), 날짜
     const header = document.createElement('div');
     header.className = 'rank-item rank-header';
     header.innerHTML = `
@@ -601,7 +625,6 @@ function renderRankings(container, mode = 'standard') {
     `;
     container.appendChild(header);
 
-    // 정렬 로직
     if (mode === 'sprint') {
         filteredRanks.sort((a, b) => (a.time || 999) - (b.time || 999));
     } else {
@@ -633,10 +656,6 @@ function renderRankings(container, mode = 'standard') {
     });
 }
 
-function hideRankings() {
-    rankingOverlay.classList.add('hidden');
-}
-
 function restartGame() {
     startMode(currentGameMode);
 }
@@ -649,11 +668,9 @@ function goHome() {
     if (p2Game) p2Game.gameOver = true;
 }
 
-// Unified Input Management
 function handleAction(key) {
     if (!p1Game || p1Game.gameOver || p1Game.paused) return;
 
-    // Player 1 Actions
     switch (key) {
         case P1_KEYS.LEFT: p1Game.move(-1); break;
         case P1_KEYS.RIGHT: p1Game.move(1); break;
@@ -662,7 +679,6 @@ function handleAction(key) {
         case P1_KEYS.HARD_DROP: p1Game.hardDrop(); break;
     }
 
-    // Player 2 Actions (Only if NOT AI)
     if (!isAiMode && p2Game && !p2Game.gameOver && !p2Game.paused) {
         switch (key) {
             case P2_KEYS.LEFT: p2Game.move(-1); break;
@@ -675,34 +691,54 @@ function handleAction(key) {
 }
 
 window.addEventListener('keydown', event => {
-    const gameKeys = [...Object.values(P1_KEYS), ...Object.values(P2_KEYS)];
-    if (!gameKeys.includes(event.key)) return;
-    
-    event.preventDefault();
-    if (keysPressed.has(event.key)) return; // Already handling this key
+    if (document.activeElement.tagName === 'INPUT') return;
 
-    // Initial Trigger
-    handleAction(event.key);
-    keysPressed.add(event.key);
+    const key = event.key;
+    const lowerKey = key.toLowerCase();
 
-    const config = SENSITIVITY_CONFIG[currentSensitivity];
+    if (lowerKey === 'm') { audioManager.init(); audioManager.toggleSFX(); updateSoundUI(); return; }
+    if (lowerKey === 'g') { toggleGhost(p1Game, p1GhostBtn); return; }
+    if (lowerKey === 'k') { cycleSkin(); return; }
+    if (lowerKey === 'v') { cycleSensitivity(); return; }
     
-    // Set DAS Timer
-    keyTimers[event.key] = setTimeout(() => {
-        if (keysPressed.has(event.key)) {
-            // Start ARR Interval
-            keyRepeatIntervals[event.key] = setInterval(() => {
-                handleAction(event.key);
-            }, config.arr);
-        }
-    }, config.das);
+    const isGameOver = !gameOverOverlay.classList.contains('hidden') || !nameInputOverlay.classList.contains('hidden');
+    if (isGameOver && lowerKey === 'r') {
+        gameOverOverlay.classList.add('hidden');
+        nameInputOverlay.classList.add('hidden');
+        restartGame();
+        return;
+    }
+
+    const isP1Key = Object.values(P1_KEYS).includes(key);
+    const isP2Key = Object.values(P2_KEYS).includes(key);
+
+    if (isP1Key || isP2Key) {
+        event.preventDefault();
+        if (key === P1_KEYS.HOLD) { if (p1Game) p1Game.hold(); return; }
+        if (key === P2_KEYS.HOLD && !isAiMode) { if (p2Game) p2Game.hold(); return; }
+        if (keysPressed.has(key)) return;
+
+        handleAction(key);
+        keysPressed.add(key);
+
+        const config = SENSITIVITY_CONFIG[currentSensitivity];
+        keyTimers[key] = setTimeout(() => {
+            if (keysPressed.has(key)) {
+                keyRepeatIntervals[key] = setInterval(() => handleAction(key), config.arr);
+            }
+        }, config.das);
+    }
 });
 
-// Continuous UI Update Loop (for real-time timer)
 function updateRealTimeUI() {
     if (p1Game && !p1Game.gameOver && !p1Game.paused) {
-        if (p1Game.mode === 'sprint') {
-            const currentTime = ((Date.now() - p1Game.startTime) / 1000).toFixed(2);
+        if (p1Game.mode === 'sprint' || p1Game.mode === 'timeattack') {
+            let currentTime;
+            if (p1Game.mode === 'timeattack') {
+                currentTime = Math.max(0, 120 - (Date.now() - p1Game.startTime) / 1000).toFixed(2);
+            } else {
+                currentTime = ((Date.now() - p1Game.startTime) / 1000).toFixed(2);
+            }
             if (p1TimerValue) p1TimerValue.innerText = currentTime;
         }
     }
@@ -710,7 +746,6 @@ function updateRealTimeUI() {
 }
 updateRealTimeUI();
 
-// Mobile Touch Controls
 function setupTouchControls() {
     const touchMappings = {
         'touch-left': P1_KEYS.LEFT,
@@ -726,35 +761,21 @@ function setupTouchControls() {
     Object.entries(touchMappings).forEach(([id, key]) => {
         const btn = document.getElementById(id);
         if (btn) {
-            // 터치 시작
             btn.addEventListener('touchstart', (e) => {
                 e.preventDefault();
                 handleAction(key);
-
-                // 방향키 및 하단키의 경우 연속 입력 처리
                 if (key === P1_KEYS.LEFT || key === P1_KEYS.RIGHT || key === P1_KEYS.DOWN) {
                     const config = SENSITIVITY_CONFIG[currentSensitivity];
-                    
                     touchTimers[id] = setTimeout(() => {
-                        touchIntervals[id] = setInterval(() => {
-                            handleAction(key);
-                        }, config.arr);
+                        touchIntervals[id] = setInterval(() => handleAction(key), config.arr);
                     }, config.das);
                 }
             }, { passive: false });
 
-            // 터치 종료
-            const stopTouch = (e) => {
-                if (touchTimers[id]) {
-                    clearTimeout(touchTimers[id]);
-                    delete touchTimers[id];
-                }
-                if (touchIntervals[id]) {
-                    clearInterval(touchIntervals[id]);
-                    delete touchIntervals[id];
-                }
+            const stopTouch = () => {
+                if (touchTimers[id]) { clearTimeout(touchTimers[id]); delete touchTimers[id]; }
+                if (touchIntervals[id]) { clearInterval(touchIntervals[id]); delete touchIntervals[id]; }
             };
-
             btn.addEventListener('touchend', stopTouch);
             btn.addEventListener('touchcancel', stopTouch);
         }
@@ -764,12 +785,6 @@ setupTouchControls();
 
 window.addEventListener('keyup', event => {
     keysPressed.delete(event.key);
-    if (keyTimers[event.key]) {
-        clearTimeout(keyTimers[event.key]);
-        delete keyTimers[event.key];
-    }
-    if (keyRepeatIntervals[event.key]) {
-        clearInterval(keyRepeatIntervals[event.key]);
-        delete keyRepeatIntervals[event.key];
-    }
+    if (keyTimers[event.key]) { clearTimeout(keyTimers[event.key]); delete keyTimers[event.key]; }
+    if (keyRepeatIntervals[event.key]) { clearInterval(keyRepeatIntervals[event.key]); delete keyRepeatIntervals[event.key]; }
 });

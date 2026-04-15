@@ -1,9 +1,11 @@
 class Tetris {
-    constructor(boardCanvas, nextCanvas, scoreElement, levelElement, onGameOver, onLinesCleared) {
+    constructor(boardCanvas, nextCanvas, holdCanvas, scoreElement, levelElement, onGameOver, onLinesCleared) {
         this.boardCanvas = boardCanvas;
         this.nextCanvas = nextCanvas;
+        this.holdCanvas = holdCanvas;
         this.ctx = boardCanvas.getContext('2d');
         this.nextCtx = nextCanvas.getContext('2d');
+        if (holdCanvas) this.holdCtx = holdCanvas.getContext('2d');
         this.scoreElement = scoreElement;
         this.levelElement = levelElement;
         this.onGameOver = onGameOver;
@@ -34,6 +36,7 @@ class Tetris {
         this.activeEffects = {
             blur: 0,   // 남은 시간(ms)
             mirror: 0,
+            invisible: 0,
             extra: 0
         };
         
@@ -97,8 +100,11 @@ class Tetris {
         this.lockResetCount = 0;
 
         // 효과 초기화
-        this.activeEffects = { blur: 0, mirror: 0, extra: 0 };
+        this.activeEffects = { blur: 0, mirror: 0, invisible: 0, extra: 0 };
         this.applyEffectsToCanvas();
+
+        this.heldPiece = null;
+        this.canHold = true;
 
         this.updateScore();
         this.spawnPiece();
@@ -110,7 +116,8 @@ class Tetris {
 
     get7BagPiece() {
         if (this.bag.length === 0) {
-            this.bag = Object.keys(SHAPES);
+            const ShapesData = (this.mode === 'penta') ? SHAPES_PENTA : SHAPES;
+            this.bag = Object.keys(ShapesData);
             // Shuffle bag (Fisher-Yates)
             for (let i = this.bag.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -119,9 +126,10 @@ class Tetris {
         }
         
         const type = this.bag.pop();
+        const ShapesData = (this.mode === 'penta') ? SHAPES_PENTA : SHAPES;
         return {
             type,
-            shape: JSON.parse(JSON.stringify(SHAPES[type]))
+            shape: JSON.parse(JSON.stringify(ShapesData[type]))
         };
     }
 
@@ -133,6 +141,8 @@ class Tetris {
             pos: { x: Math.floor(COLS / 2) - Math.floor(pieceData.shape[0].length / 2), y: 0 }
         };
         this.nextQueue.push(this.get7BagPiece());
+        
+        this.canHold = true;
 
         if (this.collide()) {
             this.gameOver = true;
@@ -141,6 +151,57 @@ class Tetris {
         }
 
         this.drawNext();
+        this.drawHold();
+    }
+
+    hold() {
+        if (!this.canHold || this.gameOver || this.paused) return;
+
+        const currentType = this.piece.type;
+        const ShapesData = (this.mode === 'penta') ? SHAPES_PENTA : SHAPES;
+
+        if (this.heldPiece === null) {
+            this.heldPiece = currentType;
+            this.spawnPiece();
+        } else {
+            const nextType = this.heldPiece;
+            this.heldPiece = currentType;
+            this.piece.type = nextType;
+            this.piece.shape = JSON.parse(JSON.stringify(ShapesData[nextType]));
+            this.piece.pos = { x: Math.floor(COLS / 2) - Math.floor(this.piece.shape[0].length / 2), y: 0 };
+            
+            if (this.collide()) {
+                this.gameOver = true;
+                if (this.onGameOver) this.onGameOver();
+            }
+        }
+
+        this.canHold = false;
+        if (typeof audioManager !== 'undefined') audioManager.play('move'); // 보관 피드백 효과음
+        this.drawHold();
+    }
+
+    drawHold() {
+        if (!this.holdCtx) return;
+        this.holdCtx.clearRect(0, 0, this.holdCanvas.width, this.holdCanvas.height);
+        if (this.heldPiece) {
+            const ShapesData = (this.mode === 'penta') ? SHAPES_PENTA : SHAPES;
+            const shape = ShapesData[this.heldPiece];
+            const maxDim = Math.max(shape.length, shape[0].length);
+            // Reduced to 0.5 for extra safety margin
+            const size = Math.min(this.holdCanvas.width / maxDim, this.holdCanvas.height / maxDim) * 0.5; 
+            
+            const offsetX = (this.holdCanvas.width - shape[0].length * size) / 2;
+            const offsetY = (this.holdCanvas.height - shape.length * size) / 2;
+            
+            shape.forEach((row, y) => {
+                row.forEach((value, x) => {
+                    if (value !== 0) {
+                        this.drawBlock(this.holdCtx, x * size + offsetX, y * size + offsetY, this.heldPiece, size, 1, true);
+                    }
+                });
+            });
+        }
     }
 
     rotate(dir = 1) { // Default to clockwise
@@ -481,33 +542,36 @@ class Tetris {
         return false;
     }
 
-    drawBlock(ctx, x, y, type, alpha = 1) {
+    drawBlock(ctx, x, y, type, size = BLOCK_SIZE, alpha = 1, isPixel = false) {
         const config = SKIN_CONFIGS[this.skin] || SKIN_CONFIGS.neon;
         const color = config.colors[type];
         
         ctx.fillStyle = color;
         ctx.globalAlpha = alpha;
         
-        if (config.glow && alpha > 0.5) {
+        if (config.glow && alpha > 0.5 && !isPixel) {
             ctx.shadowBlur = 10;
             ctx.shadowColor = color;
         } else {
             ctx.shadowBlur = 0;
         }
         
+        const drawX = isPixel ? x : x * size;
+        const drawY = isPixel ? y : y * size;
+
         // Block main body
-        ctx.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+        ctx.fillRect(drawX, drawY, size, size);
         
         // Border
         ctx.strokeStyle = config.border;
         ctx.lineWidth = 1;
-        ctx.strokeRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+        ctx.strokeRect(drawX, drawY, size, size);
 
         // Highlight for non-flat skins (subtle)
         if (this.skin === 'neon' || this.skin === 'classic') {
             ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
-            ctx.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, 2);
-            ctx.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, 2, BLOCK_SIZE);
+            ctx.fillRect(drawX, drawY, size, 2);
+            ctx.fillRect(drawX, drawY, 2, size);
         }
         
         ctx.globalAlpha = 1;
@@ -546,25 +610,23 @@ class Tetris {
     }
 
     drawNext() {
-        this.nextCtx.fillStyle = '#000';
-        this.nextCtx.fillRect(0, 0, this.nextCanvas.width, this.nextCanvas.height);
+        if (!this.nextCtx) return;
+        this.nextCtx.clearRect(0, 0, this.nextCanvas.width, this.nextCanvas.height);
 
         const isHorizontal = this.nextCanvas.width > this.nextCanvas.height;
-        const previewBlockSize = isHorizontal ? 12 : (this.nextCanvas.width * 0.3); 
+        const previewBlockSize = isHorizontal ? 12 : (this.nextCanvas.width * 0.22); 
         const spacing = isHorizontal ? 40 : (previewBlockSize * 2.8);
         
         this.nextQueue.forEach((pieceData, index) => {
             const scale = index === 0 ? 1 : 0.7; 
             const blockSize = previewBlockSize * 1.1 * scale;
-            
-            this.nextCtx.save();
             const matrix = pieceData.shape;
             const pieceWidth = matrix[0].length * blockSize;
             
             let startX, startY;
             if (isHorizontal) {
                 startX = index * (this.nextCanvas.width / 4) + 10;
-                startY = 10;
+                startY = (this.nextCanvas.height - matrix.length * blockSize) / 2;
             } else {
                 startX = (this.nextCanvas.width - pieceWidth) / 2;
                 startY = (previewBlockSize * 1.2) + (index * spacing);
@@ -573,15 +635,10 @@ class Tetris {
             matrix.forEach((row, y) => {
                 row.forEach((value, x) => {
                     if (value !== 0) {
-                        const color = SKIN_CONFIGS[this.skin].colors[pieceData.type];
-                        this.nextCtx.shadowBlur = 10;
-                        this.nextCtx.shadowColor = color;
-                        this.nextCtx.fillStyle = color;
-                        this.nextCtx.fillRect(startX + x * blockSize, startY + y * blockSize, blockSize - 1, blockSize - 1);
+                        this.drawBlock(this.nextCtx, startX + x * blockSize, startY + y * blockSize, pieceData.type, blockSize, 1, true);
                     }
                 });
             });
-            this.nextCtx.restore();
         });
     }
 
@@ -639,10 +696,13 @@ class Tetris {
         
         if (this.activeEffects.mirror > 0) this.boardCanvas.classList.add('effect-mirror');
         else this.boardCanvas.classList.remove('effect-mirror');
+
+        if (this.activeEffects.invisible > 0) this.boardCanvas.classList.add('effect-invisible');
+        else this.boardCanvas.classList.remove('effect-invisible');
     }
 
     triggerRandomEffect() {
-        const effects = ['blur', 'mirror', 'extra'];
+        const effects = ['blur', 'mirror', 'invisible', 'extra'];
         
         // 중첩 효과 주사위 (Chance for overlapping effects: 40%)
         const numEffects = Math.random() < 0.4 ? 2 : 1;
@@ -711,6 +771,16 @@ class Tetris {
             return;
         }
 
+        // 1-2. Time Attack: 120초(2분) 제한
+        if (this.mode === 'timeattack') {
+            const timeElapsed = (now - this.startTime) / 1000;
+            if (timeElapsed >= 120) {
+                this.gameOver = true;
+                if (this.onGameOver) this.onGameOver('TIME OVER!');
+                return;
+            }
+        }
+
         // 2. Rising Garbage Mode: Add line every 10-15s based on level
         if (this.mode === 'rising') {
             const interval = Math.max(5000, 15000 - (this.level * 1000));
@@ -722,8 +792,8 @@ class Tetris {
 
         // 3. Random Shift Mode: 변칙적인 효과 발생 (Irregular effects)
         if (this.mode === 'random') {
-            // 2000점마다 발동 (Trigger every 2,000 points)
-            if (this.score - this.lastRandomShiftScore >= 2000) {
+            // 1500점마다 발동 (Trigger every 1,500 points)
+            if (this.score - this.lastRandomShiftScore >= 1500) {
                 this.triggerRandomEffect();
                 this.lastRandomShiftScore = this.score;
             }

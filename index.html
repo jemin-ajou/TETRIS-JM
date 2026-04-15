@@ -10,6 +10,9 @@
 <body class="skin-neon">
     <div id="app">
         <div id="main-menu" class="overlay active">
+            <!-- 우측 상단 매뉴얼 버튼 -->
+            <button id="btn-nav-manual" class="glow-btn mini-btn top-right">매뉴얼</button>
+
             <!-- Row 1: Title -->
             <h1 class="glitch" data-text="TETRIS JM">TETRIS JM</h1>
 
@@ -72,6 +75,18 @@
                         <div class="card-content">
                             <h3>RISING</h3>
                             <p>Garbage rises from the bottom!</p>
+                        </div>
+                    </div>
+                    <div class="premium-neon-card mode-card" data-mode="timeattack">
+                        <div class="card-content">
+                            <h3>TIME ATTACK</h3>
+                            <p>Score max in 2 minutes!</p>
+                        </div>
+                    </div>
+                    <div class="premium-neon-card mode-card" data-mode="penta">
+                        <div class="card-content">
+                            <h3>PENTA</h3>
+                            <p>Harder mode with 5-blocks!</p>
                         </div>
                     </div>
                 </div>
@@ -160,9 +175,15 @@
                     </select>
                 </div>
                 <div class="game-layout">
-                    <div class="board-wrap next-piece">
-                        <label>NEXT</label>
-                        <canvas id="p1-next" class="next-preview" width="80" height="320"></canvas>
+                    <div class="side-panel left">
+                        <div class="board-wrap hold-piece">
+                            <label>HOLD</label>
+                            <canvas id="p1-hold" class="next-preview" width="80" height="120"></canvas>
+                        </div>
+                        <div class="board-wrap next-piece">
+                            <label>NEXT</label>
+                            <canvas id="p1-next" class="next-preview" width="80" height="320"></canvas>
+                        </div>
                     </div>
                     <div class="board-wrapper">
                         <canvas id="p1-board" width="350" height="700"></canvas>
@@ -201,26 +222,31 @@
                 </div>
                 <!-- 조작부: 스킨 선택 및 고스트 토글 -->
                 <div class="game-controls">
-                    <select class="neo-select in-game-skin-select">
+                    <button class="pause-toggle-btn" title="Pause/Resume">⏸️</button>
+                    <button class="sfx-toggle-btn" title="Toggle SFX">🔊</button>
+                    <select class="input-speed-select mini-select" title="In-game Sensitivity">
+                        <option value="high">SPEED: HIGH</option>
+                        <option value="medium">SPEED: MED</option>
+                        <option value="low">SPEED: LOW</option>
+                    </select>
+                    <button id="p2-ghost-toggle" class="toggle-btn active" title="Toggle Ghost Piece">👻</button>
+                    <select class="in-game-skin-select">
                         <option value="neon">NEON SKIN</option>
                         <option value="classic">CLASSIC SKIN</option>
                         <option value="dark">DARK SKIN</option>
                         <option value="light">LIGHT SKIN</option>
                     </select>
-                    <select class="input-speed-select" title="Input Sensitivity">
-                        <option value="high">SPEED: HIGH (상)</option>
-                        <option value="medium" selected>SPEED: MED (중)</option>
-                        <option value="low">SPEED: LOW (하)</option>
-                    </select>
-                    <button class="bgm-toggle-btn" title="BGM On/Off">🎵</button>
-                    <button class="sfx-toggle-btn" title="SFX On/Off">🔊</button>
-                    <button class="pause-toggle-btn" title="Pause/Resume">⏸️</button>
-                    <button id="p2-ghost-toggle" class="toggle-btn active">GHOST: ON</button>
                 </div>
                 <div class="game-layout">
-                    <div class="board-wrap next-piece">
-                        <label>NEXT</label>
-                        <canvas id="p2-next" class="next-preview" width="80" height="320"></canvas>
+                    <div class="side-panel left">
+                        <div class="board-wrap hold-piece">
+                            <label>HOLD</label>
+                            <canvas id="p2-hold" class="next-preview" width="80" height="120"></canvas>
+                        </div>
+                        <div class="board-wrap next-piece">
+                            <label>NEXT</label>
+                            <canvas id="p2-next" class="next-preview" width="80" height="320"></canvas>
+                        </div>
                     </div>
                     <div class="board-wrapper">
                         <canvas id="p2-board" width="350" height="700"></canvas>
@@ -247,6 +273,8 @@
                 <button class="rank-tab" data-mode="sprint">SPRINT</button>
                 <button class="rank-tab" data-mode="random">RANDOM</button>
                 <button class="rank-tab" data-mode="rising">RISING</button>
+                <button class="rank-tab" data-mode="timeattack">TIME ATTACK</button>
+                <button class="rank-tab" data-mode="penta">PENTA</button>
             </div>
             <div class="ranking-list" id="rank-list-content">
                 <!-- 랭킹 데이터가 동적으로 삽입됨 -->
@@ -261,8 +289,48 @@
             <input type="text" id="player-name-input" maxlength="10" placeholder="CYBER_PUNK">
             <div class="overlay-button-group">
                 <button id="btn-save-score" class="neo-btn">SAVE RECORD</button>
+                <button id="btn-name-restart" class="neo-btn secondary">RESTART</button>
                 <button id="btn-name-home" class="neo-btn secondary">HOME</button>
             </div>
+        </div>
+
+        <!-- 매뉴얼 오버레이 (조작법 & 단축키) -->
+        <div id="manual-overlay" class="overlay hidden">
+            <h2 class="glitch" data-text="GAME MANUAL">게임 가이드</h2>
+            <div class="manual-content">
+                <div class="manual-section">
+                    <h3>🕹️ 기본 조작 (Basic Controls)</h3>
+                    <ul class="manual-list">
+                        <li><strong>방향키 (좌/우)</strong>: 블록 이동</li>
+                        <li><strong>방향키 (상)</strong>: 블록 회전</li>
+                        <li><strong>방향키 (하)</strong>: 소프트 드롭 (천천히 내리기)</li>
+                        <li><strong>스페이스바</strong>: 하드 드롭 (즉시 내리기)</li>
+                        <li><strong>SHIFT 키</strong>: 블록 보관 (HOLD)</li>
+                    </ul>
+                </div>
+                <div class="manual-section">
+                    <h3>⌨️ 글로벌 단축키 (Shortcuts)</h3>
+                    <ul class="manual-list">
+                        <li><span class="key-badge">M</span> : 소리 ON/OFF (배경음/효과음)</li>
+                        <li><span class="key-badge">G</span> : 고스트 모드 ON/OFF (그림자)</li>
+                        <li><span class="key-badge">K</span> : 테마 변경 (스킨 사이클)</li>
+                        <li><span class="key-badge">V</span> : 입력 감도 조절 (키보드 속도)</li>
+                        <li><span class="key-badge">R</span> : 즉시 재시작 (종료 시 작동)</li>
+                    </ul>
+                </div>
+                <div class="manual-section">
+                    <h3>🌟 게임 모드 (Game Modes)</h3>
+                    <ul class="manual-list">
+                        <li><strong>STANDARD</strong>: 클래식 무한 모드</li>
+                        <li><strong>SPRINT</strong>: 40줄 최대한 빨리 지우기</li>
+                        <li><strong>RISING</strong>: 아래에서 쓰레기 블록 생성</li>
+                        <li><strong>RANDOM</strong>: 1500점마다 랜덤 효과 발생</li>
+                        <li><strong>PENTA</strong>: 5칸 블록이 등장하는 고난도</li>
+                        <li><strong>TIME ATTACK</strong>: 2분 동안 최고 점수 도전</li>
+                    </ul>
+                </div>
+            </div>
+            <button id="btn-manual-close" class="neo-btn">닫기</button>
         </div>
     </div>
 
