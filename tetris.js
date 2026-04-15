@@ -643,20 +643,35 @@ class Tetris {
 
     triggerRandomEffect() {
         const effects = ['blur', 'mirror', 'extra'];
-        const chosen = effects[Math.floor(Math.random() * effects.length)];
-        const duration = 10000 + Math.random() * 5000; // 10~15초 (seconds)
-
-        if (chosen === 'extra') {
-            this.randomizeField(5);
-            this.addFloatingText('RANDOM BLOCKS!', this.boardCanvas.width / 2, this.boardCanvas.height / 2, '#ffcc00', '40px');
-        } else {
-            this.activeEffects[chosen] = duration;
-            const text = chosen.toUpperCase() + ' MODE!';
-            this.addFloatingText(text, this.boardCanvas.width / 2, this.boardCanvas.height / 2, '#ff00ff', '50px');
-            this.applyEffectsToCanvas();
-        }
         
-        if (typeof audioManager !== 'undefined') audioManager.play('clear'); // 임시 효과음
+        // 중첩 효과 주사위 (Chance for overlapping effects: 40%)
+        const numEffects = Math.random() < 0.4 ? 2 : 1;
+        const selected = [];
+        
+        for (let i = 0; i < numEffects; i++) {
+            const effect = effects[Math.floor(Math.random() * effects.length)];
+            if (!selected.includes(effect)) selected.push(effect);
+        }
+
+        selected.forEach(chosen => {
+            const duration = 12000 + Math.random() * 8000; // 12~20초 (seconds)
+
+            if (chosen === 'extra') {
+                this.randomizeField(6); // 6개 블록 추가 (Updated from 5)
+                this.addFloatingText('RANDOM BLOCKS!', this.boardCanvas.width / 2, this.boardCanvas.height / 2 + 50, '#ffcc00', '40px');
+            } else {
+                this.activeEffects[chosen] = duration;
+                const text = chosen.toUpperCase() + ' MODE!';
+                const yOffset = chosen === 'blur' ? -50 : 0;
+                this.addFloatingText(text, this.boardCanvas.width / 2, this.boardCanvas.height / 2 + yOffset, '#ff00ff', '50px');
+            }
+        });
+
+        this.applyEffectsToCanvas();
+        if (typeof audioManager !== 'undefined') {
+            audioManager.play('clear');
+            if (numEffects > 1) setTimeout(() => audioManager.play('tetris'), 200);
+        }
     }
 
     isPieceOnGround() {

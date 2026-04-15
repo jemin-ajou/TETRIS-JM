@@ -9,10 +9,10 @@ class TetrisAI {
         this.isMoving = false;
         
         this.settings = {
-            easy: { delay: 600, mistakeRatio: 0.3, speed: 400, reaction: 800 },
-            medium: { delay: 400, mistakeRatio: 0.1, speed: 200, reaction: 500 },
-            hard: { delay: 150, mistakeRatio: 0.05, speed: 80, reaction: 200 },
-            boss: { delay: 50, mistakeRatio: 0, speed: 20, reaction: 50 }
+            easy: { delay: 600, mistakeRatio: 0.2, speed: 350, reaction: 600 },
+            medium: { delay: 400, mistakeRatio: 0.1, speed: 180, reaction: 350 },
+            hard: { delay: 150, mistakeRatio: 0, speed: 60, reaction: 120 },
+            boss: { delay: 50, mistakeRatio: 0, speed: 20, reaction: 30 }
         };
 
         this.reactionTimer = 0;
