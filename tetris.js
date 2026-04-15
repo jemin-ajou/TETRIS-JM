@@ -690,7 +690,6 @@ class Tetris {
 
         // 1. Sprint Mode: Check 40 lines
         if (this.mode === 'sprint' && this.totalLinesCleared >= 40) {
-            const now = Date.now();
             this.timeTaken = ((now - this.startTime) / 1000).toFixed(2);
             this.gameOver = true;
             if (this.onGameOver) this.onGameOver(`FINISH! ${this.timeTaken}s`);
@@ -708,11 +707,12 @@ class Tetris {
 
         // 3. Random Shift Mode: 변칙적인 효과 발생 (Irregular effects)
         if (this.mode === 'random') {
-            // 5000점마다 또는 일정 확률로 효과 발생
-            if (this.score - this.lastRandomShiftScore >= 5000) {
+            // 2000점마다 발동 (Trigger every 2,000 points)
+            if (this.score - this.lastRandomShiftScore >= 2000) {
                 this.triggerRandomEffect();
                 this.lastRandomShiftScore = this.score;
             }
         }
     }
 }
+
