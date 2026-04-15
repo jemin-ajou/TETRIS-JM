@@ -29,6 +29,14 @@ class Tetris {
         this.lockDelayCounter = 0;
         this.lockResetCount = 0;
         this.maxLockResets = 15;
+
+        // 효과 시스템 (Effect System)
+        this.activeEffects = {
+            blur: 0,   // 남은 시간(ms)
+            mirror: 0,
+            extra: 0
+        };
+        
         this.reset();
     }
 
@@ -87,6 +95,10 @@ class Tetris {
         this.totalGarbageAdded = 0;
         this.lockDelayCounter = 0;
         this.lockResetCount = 0;
+
+        // 효과 초기화
+        this.activeEffects = { blur: 0, mirror: 0, extra: 0 };
+        this.applyEffectsToCanvas();
 
         this.updateScore();
         this.spawnPiece();
@@ -598,7 +610,53 @@ class Tetris {
         }
 
         this.draw();
+        
+        // 효과 타이머 업데이트 (Update effect timers)
+        this.updateEffects(deltaTime);
+
         requestAnimationFrame(this.update.bind(this));
+    }
+
+    updateEffects(dt) {
+        let changed = false;
+        for (let key in this.activeEffects) {
+            if (this.activeEffects[key] > 0) {
+                this.activeEffects[key] -= dt;
+                if (this.activeEffects[key] <= 0) {
+                    this.activeEffects[key] = 0;
+                    changed = true;
+                }
+            }
+        }
+        if (changed) this.applyEffectsToCanvas();
+    }
+
+    applyEffectsToCanvas() {
+        if (!this.boardCanvas) return;
+        
+        if (this.activeEffects.blur > 0) this.boardCanvas.classList.add('effect-blur');
+        else this.boardCanvas.classList.remove('effect-blur');
+        
+        if (this.activeEffects.mirror > 0) this.boardCanvas.classList.add('effect-mirror');
+        else this.boardCanvas.classList.remove('effect-mirror');
+    }
+
+    triggerRandomEffect() {
+        const effects = ['blur', 'mirror', 'extra'];
+        const chosen = effects[Math.floor(Math.random() * effects.length)];
+        const duration = 10000 + Math.random() * 5000; // 10~15초 (seconds)
+
+        if (chosen === 'extra') {
+            this.randomizeField(5);
+            this.addFloatingText('RANDOM BLOCKS!', this.boardCanvas.width / 2, this.boardCanvas.height / 2, '#ffcc00', '40px');
+        } else {
+            this.activeEffects[chosen] = duration;
+            const text = chosen.toUpperCase() + ' MODE!';
+            this.addFloatingText(text, this.boardCanvas.width / 2, this.boardCanvas.height / 2, '#ff00ff', '50px');
+            this.applyEffectsToCanvas();
+        }
+        
+        if (typeof audioManager !== 'undefined') audioManager.play('clear'); // 임시 효과음
     }
 
     isPieceOnGround() {
@@ -648,10 +706,13 @@ class Tetris {
             }
         }
 
-        // 3. Random Shift Mode: Every 5000 points
-        if (this.mode === 'random' && this.score - this.lastRandomShiftScore >= 5000) {
-            this.randomizeField(3); // Add 3 random blocks
-            this.lastRandomShiftScore = this.score;
+        // 3. Random Shift Mode: 변칙적인 효과 발생 (Irregular effects)
+        if (this.mode === 'random') {
+            // 5000점마다 또는 일정 확률로 효과 발생
+            if (this.score - this.lastRandomShiftScore >= 5000) {
+                this.triggerRandomEffect();
+                this.lastRandomShiftScore = this.score;
+            }
         }
     }
 }

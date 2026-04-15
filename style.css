@@ -482,6 +482,16 @@ h1 {
 
 canvas {
     display: block;
+    transition: filter 0.5s ease, transform 0.5s ease;
+}
+
+/* 랜덤 모드 특수 효과 (Random Mode Effects) */
+.effect-blur {
+    filter: blur(8px);
+}
+
+.effect-mirror {
+    transform: scaleX(-1);
 }
 
 .hidden {
